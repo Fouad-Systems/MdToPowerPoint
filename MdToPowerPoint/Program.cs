@@ -1,5 +1,10 @@
 ﻿using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
+using Microsoft.Toolkit.Parsers.Markdown;
+using Microsoft.Toolkit.Parsers.Markdown.Blocks;
+using Microsoft.Toolkit.Parsers.Markdown.Inlines;
+using PowerPointLibrary.Helper;
+using PowerPointLibrary.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,148 +36,102 @@ namespace MdToPowerPoint
 
         private static void AutoPresentation()
         {
-            try
+
+
+          //  TestHelpers.Main1();
+
+            // Load MarkDown File
+            string BaseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            StreamReader sr = new StreamReader(BaseDir + "\\introduction.md");
+            string md = sr.ReadToEnd();
+
+
+            // Parse
+            MarkdownDocument document = new MarkdownDocument();
+            document.Parse(md);
+
+
+            PresentationHelper presentationHelper = new PresentationHelper();
+            presentationHelper.Create("template1.potm");
+
+
+            int SlideIndex = 1;
+            bool newSlide = false;
+            TitleAndContentSlideHelper slide = null;
+            foreach (var element in document.Blocks)
             {
-                // Create an instance of Microsoft PowerPoint and make it  
-                // invisible. 
-
-                Application oPowerPoint = new Application();
-
-
-                // By default PowerPoint is invisible, till you make it visible: 
-                oPowerPoint.Visible = MsoTriState.msoCTrue;
-
-
-                // Create a new Presentation. 
-
-                Presentation oPre = oPowerPoint.Presentations.Add(MsoTriState.msoFalse);
-                Console.WriteLine("Presentation created");
-
-                //Data Parse
-
-                string BaseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-                Console.WriteLine(BaseDir + "\\data.csv");
-                List<Presentee> collection = new List<Presentee>();
-                using (StreamReader sr = new StreamReader(BaseDir + "\\data.csv"))
+                if (element is HeaderBlock header)
                 {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
+
+                    slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
+
+                    string Slide_name = slide.Slide.Name;
+                    int c = slide.Slide.Shapes.Count;
+                    string name = slide.Slide.Shapes[1].Name;
+
+
+                    TextRange TitleTextRange = slide.Slide.Shapes[1].TextFrame.TextRange;
+                    new TextRangeHelper(TitleTextRange).AddMarkdownBlock(element);
+
+                    //oText.Text = "Bonjour l'informatique";
+                    //oText.Words(1, 1).Find("Bonjour").Font.Bold = MsoTriState.msoCTrue;
+                    //oText.Words(1, 1).Find("Bonjour").Font.Size = 20;
+                    //oText =  oText.Words(1,1).InsertAfter(oText.Words(1, 1));
+
+                }
+ 
+                if (element is ParagraphBlock Paragraph)
+                {
+                    if(Paragraph.Inlines[0].Type == MarkdownInlineType.Comment)
                     {
-                        //Console.WriteLine(line);
-                        string[] values = line.Split(',');
-                        collection.Add(new Presentee
+                        string comment = Paragraph.Inlines[0].ToString();
+
+                        // Change Slide layout
+                        if(comment.StartsWith("<!-- slide : "))
                         {
-                            LastName = Convert.ToString(values[0]),
-                            FirstName = Convert.ToString(values[1]),
-                            Initial = Convert.ToString(values[2]),
-                            Faculty = Convert.ToString(values[3]),
-                            Directory = Convert.ToString(values[4])
-                        });
+                            string layout = comment.Replace("<!-- slide : ", "");
+                            layout = layout.Replace("-->", "");
+                            layout = layout.Trim();
+                            // slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
+                            slide.ChangeLayout(layout);
+                        }
+
+                        // Change zone
+                        if (comment.StartsWith("<!-- zone : "))
+                        {
+                            string ShapesName = comment.Replace("<!-- zone : ", "");
+                            ShapesName = ShapesName.Replace("-->", "");
+                            ShapesName = ShapesName.Trim();
+                            // slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
+                            slide.CurrentShapesName = ShapesName;
+                        }
+
                     }
+
+                    TextRange TitleTextRange = slide.Slide.Shapes[2].TextFrame.TextRange;
+                    if (!string.IsNullOrEmpty(slide.CurrentShapesName))
+                    {
+                        string Slide_name = slide.Slide.Name;
+                        int c = slide.Slide.Shapes.Count;
+                        string name = slide.Slide.Shapes[1].Name;
+                         name  = slide.Slide.Shapes[2].Name;
+                        name = slide.Slide.Shapes[3].Name;
+                        TitleTextRange = slide.Slide.Shapes["Content Placeholder 6"].TextFrame.TextRange;
+                    }
+                   
+                    new TextRangeHelper(TitleTextRange).AddMarkdownBlock(element);
+                   
+                    
+                    
                 }
 
-                // Insert a new Slide and add some text to it.
-                Slide oSlide;
-                Microsoft.Office.Interop.PowerPoint.TextFrame oFrame;
-                TextRange oText;
-                int SlideCount = 0;
-                foreach (Presentee set in collection)
-                {
-                    oSlide = oPre.Slides.Add(++SlideCount, PpSlideLayout.ppLayoutBlank);
-
-                    // Last Name
-                    oSlide.Shapes.AddTextbox(
-                        MsoTextOrientation.msoTextOrientationHorizontal,
-                        430,
-                        150,
-                        500,
-                        50
-                    );
-
-                    //First Name & Initials
-                    oSlide.Shapes.AddTextbox(
-                        MsoTextOrientation.msoTextOrientationHorizontal,
-                        430,
-                        150 + 115,
-                        500,
-                        50
-                    );
-
-                    //Faculty
-                    oSlide.Shapes.AddTextbox(
-                        MsoTextOrientation.msoTextOrientationHorizontal,
-                        430,
-                        150 + 115 + 120,
-                        500,
-                        50
-                    );
-
-                    // Alignment
-                    oFrame = oSlide.Shapes[1].TextFrame;
-                    oFrame.VerticalAnchor = MsoVerticalAnchor.msoAnchorMiddle;
-                    oFrame = oSlide.Shapes[2].TextFrame;
-                    oFrame.VerticalAnchor = MsoVerticalAnchor.msoAnchorMiddle;
-                    oFrame = oSlide.Shapes[3].TextFrame;
-                    oFrame.VerticalAnchor = MsoVerticalAnchor.msoAnchorMiddle;
-
-                    // Text Format & Content
-                    oText = oSlide.Shapes[1].TextFrame.TextRange;
-                    oText.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
-                    oText.Text = set.LastName + ",";
-                    oText.Font.Name = "Palatino Linotype";
-                    oText.Font.Bold = MsoTriState.msoTrue;
-                    oText.Font.Size = 72;
-
-                    oText = oSlide.Shapes[2].TextFrame.TextRange;
-                    oText.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
-                    oText.Text = set.FirstName + " " + set.Initial + ".";
-                    oText.Font.Name = "Palatino Linotype";
-                    oText.Font.Size = 64;
-
-                    oText = oSlide.Shapes[3].TextFrame.TextRange;
-                    oText.ParagraphFormat.Alignment = PpParagraphAlignment.ppAlignCenter;
-                    oText.Text = set.Faculty;
-                    oText.Font.Name = "Palatino Linotype";
-                    oText.Font.Color.RGB = 1689855;
-                    oText.Font.Size = 40;
-
-
-                    //Picture
-                    oSlide.Shapes.AddPicture(
-                        set.Directory,
-                        MsoTriState.msoFalse,
-                        MsoTriState.msoTrue,
-                        30,
-                        30,
-                        380,
-                        500
-                    );
-
-                    Console.WriteLine("Slide {0}: {1},{2} {3}. ", SlideCount, set.LastName, set.FirstName, set.Initial);
-                }
-
-                // Save the presentation as a pptx file and close it. 
-
-                Console.WriteLine("Save and close the presentation");
-
-                string fileName = BaseDir + "\\output.pptx";
-                oPre.SaveAs(fileName,
-                    PpSaveAsFileType.ppSaveAsOpenXMLPresentation,
-                    MsoTriState.msoTriStateMixed);
-                oPre.Close();
-
-                // Quit the PowerPoint application. 
-
-                Console.WriteLine("Quit the PowerPoint application");
-                oPowerPoint.Quit();
-                Console.ReadKey();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Program.AutomatePowerPoint throws the error: {0}", ex.Message);
-                Console.ReadKey();
-            }
+
+
+            string fileName = BaseDir + "\\output.pptx";
+            presentationHelper.SaveAs(fileName);
+            presentationHelper.Close();
+
         }
 
 
