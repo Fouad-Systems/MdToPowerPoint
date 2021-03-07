@@ -27,21 +27,35 @@ namespace PowerPointLibrary.BLO
         internal PresentationStructure _PresentationStructure;
 
         #region Manager
-        private readonly PowerPointApplicationManager _ApplicationManager = new PowerPointApplicationManager();
-        private readonly PresentationManager _PresentationManager = new PresentationManager();
-
-        private readonly SlideManager _SlideManager = new SlideManager();
-
-        private readonly ShapesManager _ShapeManager = new ShapesManager();
-        private readonly TextRangeManager _TextRangeManager = new TextRangeManager();
+        private readonly PowerPointApplicationManager _ApplicationManager;
+        private readonly PresentationManager _PresentationManager;
+        private readonly SlideManager _SlideManager;
+        private readonly ShapesManager _ShapeManager;
+        private readonly TextRangeManager _TextRangeManager;
 
         #endregion
 
-        private readonly PresentationStructureBLO _TemplateStructureBLO = new PresentationStructureBLO();
-        private readonly TextStructureBLO _TextStructureBLO = new TextStructureBLO();
+        private readonly PresentationStructureBLO _TemplateStructureBLO;
+        private readonly TextStructureBLO _TextStructureBLO;
+        private readonly CommentActionBLO _CommentActionBLO;
+        private readonly SlideBLO _SlideBLO;
 
         public PresentationBLO()
         {
+            // Init Manager
+            _ApplicationManager = new PowerPointApplicationManager();
+            _PresentationManager = new PresentationManager();
+            _SlideManager = new SlideManager();
+            _TextRangeManager = new TextRangeManager();
+
+
+            // Init BLO
+            _TemplateStructureBLO = new PresentationStructureBLO();
+            _TextStructureBLO = new TextStructureBLO();
+            _CommentActionBLO = new CommentActionBLO();
+            _SlideBLO = new SlideBLO(this);
+
+
             _Application = _ApplicationManager.CreatePowerPointApplication();
             _PresentationStructure = new PresentationStructure();
         }
@@ -61,7 +75,7 @@ namespace PowerPointLibrary.BLO
                 if (!File.Exists(PowerPointTemplateFileName))
                 {
                     string msg = $"The file { PowerPointTemplateFileName} or {TemplateName + ".potx"} not exist";
-                    throw new PowerPointLibrary.Exceptions.PowerPointLibraryException(msg);
+                    throw new PowerPointLibrary.Exceptions.PplException(msg);
                 }
             }
 
@@ -99,95 +113,73 @@ namespace PowerPointLibrary.BLO
             {
                 if (element is HeaderBlock header)
                 {
+                    string layout = "";
+                    if (header.HeaderLevel == 1) layout = "Titre partie";
+                    if (header.HeaderLevel >= 2) layout = "Titre et contenu";
 
-                    this.AddSlide(header);
+                    _SlideBLO.AddSlide(layout);
 
-                    var currentSlide = this._PresentationStructure.CurrentSlide;
-                    SlideZoneStructure slideZoneTitle = currentSlide.SlideZones.Where(z => z.Name == "Titre")
-                        .FirstOrDefault();
-                    slideZoneTitle.Text = _TextStructureBLO.CreateFromMarkdownBlock(header);
-
-                    //slide = new TitleAndContentSlideHelper(presentationBLO, SlideIndex++);
-                    //string Slide_name = slide.Slide.Name;
-                    //int c = slide.Slide.Shapes.Count;
-                    //string name = slide.Slide.Shapes[1].Name;
-
-
-                    //TextRange TitleTextRange = slide.Slide.Shapes[1].TextFrame.TextRange;
-                    //new TextRangeHelper(TitleTextRange).AddMarkdownBlock(element);
-
-                    //oText.Text = "Bonjour l'informatique";
-                    //oText.Words(1, 1).Find("Bonjour").Font.Bold = MsoTriState.msoCTrue;
-                    //oText.Words(1, 1).Find("Bonjour").Font.Size = 20;
-                    //oText =  oText.Words(1,1).InsertAfter(oText.Words(1, 1));
+                    SlideZoneStructure zoneTitle = this.CurrentSlide.CurrentZone;
+                
+                    if (zoneTitle != null)
+                        zoneTitle.Text = _TextStructureBLO.CreateFromMarkdownBlock(header);
 
                 }
 
                 if (element is ParagraphBlock Paragraph)
                 {
-                    //if (Paragraph.Inlines[0].Type == MarkdownInlineType.Comment)
-                    //{
-                    //    string comment = Paragraph.Inlines[0].ToString();
+                 
+                    _SlideBLO.ChangeZoneToParagraphe();
 
-                    //    // Change Slide layout
-                    //    if (comment.StartsWith("<!-- slide : "))
-                    //    {
-                    //        string layout = comment.Replace("<!-- slide : ", "");
-                    //        layout = layout.Replace("-->", "");
-                    //        layout = layout.Trim();
-                    //        // slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
-                    //        slide.ChangeLayout(layout);
-                    //    }
+                    // if paragraphe is action
+                    if (Paragraph.Inlines[0].Type == MarkdownInlineType.Comment
+                        && _CommentActionBLO.IsAction(Paragraph.Inlines[0].ToString()))
+                    {
 
-                    //    // Change zone
-                    //    if (comment.StartsWith("<!-- zone : "))
-                    //    {
-                    //        string ShapesName = comment.Replace("<!-- zone : ", "");
-                    //        ShapesName = ShapesName.Replace("-->", "");
-                    //        ShapesName = ShapesName.Trim();
-                    //        // slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
-                    //        slide.CurrentShapesName = ShapesName;
-                    //    }
+                        string comment = Paragraph.Inlines[0].ToString();
 
-                    //}
+                        CommentAction commentAction = _CommentActionBLO.ParseComment(comment);
 
-                    //TextRange TitleTextRange = slide.Slide.Shapes[2].TextFrame.TextRange;
-                    //if (!string.IsNullOrEmpty(slide.CurrentShapesName))
-                    //{
-                    //    string Slide_name = slide.Slide.Name;
-                    //    int c = slide.Slide.Shapes.Count;
-                    //    string name = slide.Slide.Shapes[1].Name;
-                    //    name = slide.Slide.Shapes[2].Name;
-                    //    name = slide.Slide.Shapes[3].Name;
-                    //    TitleTextRange = slide.Slide.Shapes["Content Placeholder 6"].TextFrame.TextRange;
-                    //}
+                        switch (commentAction.ActionType)
+                        {
+                            case CommentAction.ActionTypes.ChangeLayout:
+                                _SlideBLO
+                                    .ChangeLayout(this.CurrentSlide, commentAction.Layout);
+                                break;
+                            case CommentAction.ActionTypes.ChangeZone:
+                                _SlideBLO
+                                    .ChangeCurrentZone(this.CurrentSlide, commentAction.ZoneName);
+                                break;
+                            case CommentAction.ActionTypes.NewSlide:
+                                _SlideBLO.AddSlide(commentAction.Layout);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        
+                        if (this.CurrentSlide.CurrentZone != null)
+                        {
+                            this.CurrentSlide.CurrentZone.Text = _TextStructureBLO.CreateFromMarkdownBlock(Paragraph);
+                        }
+                        else
+                        {
+                            if (this.CurrentSlide.AddToNotes)
+                            {
+                                this.CurrentSlide.Notes.Text = _TextStructureBLO.CreateFromMarkdownBlock(Paragraph);
 
-                    var currentSlide = this._PresentationStructure.CurrentSlide;
-                    SlideZoneStructure ContenuZone = currentSlide.SlideZones.Where(z => z.Name == "Contenu")
-                        .FirstOrDefault();
-                    if (ContenuZone != null)
-                        ContenuZone.Text = _TextStructureBLO.CreateFromMarkdownBlock(Paragraph);
+                            }
+                        }
+                            
+                    }
+
+                  
                 }
 
             }
         }
 
-        private void AddSlide(HeaderBlock header)
-        {
-            SlideStructure slideStructure = new SlideStructure();
-            _PresentationStructure.Slides.Add(slideStructure);
-            slideStructure.Name = "Slide" + this._PresentationStructure.Slides.Count;
 
-            if (header.HeaderLevel == 1) slideStructure.Template = "Titre partie";
-            if (header.HeaderLevel >= 2) slideStructure.Template = "Titre et contenue";
-
-            // Add Template Zone to Slide
-            var TemplateSlide = _TemplateStructure.Slides
-                 .Where(s => s.Name == slideStructure.Template).FirstOrDefault();
-
-            slideStructure.SlideZones = TemplateSlide.SlideZones.Select(s => new SlideZoneStructure() { Name = s.Name  }).ToList();
-            slideStructure.TemplateSlide = TemplateSlide;
-        }
 
         public void GeneratePresentation()
         {
@@ -198,6 +190,11 @@ namespace PowerPointLibrary.BLO
                 SlideRange slideRange = _SlideManager
                     .CloneSlide(_Presentation, _Presentation.Slides[slide.TemplateSlide.Order], Locations.Location.Last);
 
+                // Add Note content
+                // slideRange.NotesPage
+
+
+
                 foreach (var SlideZone in slide.SlideZones)
                 {
                     // Add Text
@@ -205,18 +202,34 @@ namespace PowerPointLibrary.BLO
                     {
                         var shape = slideRange.Shapes[SlideZone.Name];
                         _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
+
+                         
                     }
                 }
+
+                
             }
 
             // Delete Template Slide
-          
+            foreach (SlideStructure slide in _TemplateStructure.Slides)
+            {
+                _SlideManager.DeleteSlide(_Presentation.Slides[1]);
+            }
+           
 
 
 
             this.SaveAs(Environment.CurrentDirectory + "/" + "output.pptx");
             this.Close();
 
+        }
+
+        public SlideStructure CurrentSlide
+        {
+            get
+            {
+                return this._PresentationStructure.CurrentSlide;
+            }
         }
     }
 }

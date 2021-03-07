@@ -47,7 +47,7 @@ namespace PowerPointLibrary.BLO
             if(!File.Exists(filePath))
             {
                 string msg = $"The file {filePath} doesn't exist ";
-                throw new PowerPointLibrary.Exceptions.PowerPointLibraryException(msg);
+                throw new PowerPointLibrary.Exceptions.PplException(msg);
             }
 
             string code = File.ReadAllText(filePath);

@@ -9,6 +9,8 @@
 
     using PPT = Microsoft.Office.Interop.PowerPoint;
     using OFFICE = Microsoft.Office.Core;
+    using Microsoft.Office.Interop.PowerPoint;
+    using PowerPointLibrary.Exceptions;
 
     public class SlideManager : ISlideManager
     {
@@ -294,6 +296,22 @@
         public PPT.Slide FindSlideByItsID(PPT.Presentation presentation, int slideId)
         {
             return presentation.Slides.FindBySlideID(slideId);
+        }
+
+        public void ChangeLayout(Slide Slide, string LayoutName)
+        {
+            CustomLayout customLayout = this.FindCustomLayoutByName(Slide, LayoutName);
+            if (customLayout == null) throw new PplException($"The layout {LayoutName} doesn't exist");
+            Slide.CustomLayout = customLayout;
+        }
+
+        public CustomLayout FindCustomLayoutByName(Slide Slide, string Name)
+        {
+            foreach (CustomLayout customLayout in Slide.Design.SlideMaster.CustomLayouts)
+            {
+                if (customLayout.Name == Name) return customLayout;
+            }
+            return null;
         }
     }
 }

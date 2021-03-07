@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.Exceptions
 {
-    public class PowerPointLibraryException : Exception
+    public class PplException : Exception
     {
-        public PowerPointLibraryException(string message) : base(message)
+        public PplException(string message) : base(message)
         {
         }
     }

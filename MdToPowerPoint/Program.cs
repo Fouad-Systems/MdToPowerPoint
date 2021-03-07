@@ -68,7 +68,8 @@ namespace MdToPowerPoint
             presentationBLO.GeneratePresentation();
 
 
-            System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+           // System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            System.Diagnostics.Process.Start(Environment.CurrentDirectory + "/" + "output.pptx");
 
         }
 

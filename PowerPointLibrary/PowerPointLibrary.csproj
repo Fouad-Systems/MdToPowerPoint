@@ -64,12 +64,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BLO\CommentActionBLO.cs" />
     <Compile Include="BLO\PresentationStructureBLO.cs" />
+    <Compile Include="BLO\SlideBLO.cs" />
     <Compile Include="BLO\TextStructureBLO.cs" />
+    <Compile Include="Entities\CommentAction.cs" />
     <Compile Include="Entities\SlideStructure.cs" />
     <Compile Include="Entities\SlideZoneStructure.cs" />
     <Compile Include="Entities\TextStructure.cs" />
-    <Compile Include="Exceptions\PowerPointLibraryException.cs" />
+    <Compile Include="Exceptions\PplException.cs" />
     <Compile Include="Manager\Contracts\IChartManager.cs" />
     <Compile Include="Manager\Contracts\IPowerPointManager.cs" />
     <Compile Include="Manager\Contracts\IPresentationManager.cs" />
@@ -78,10 +81,7 @@
     <Compile Include="Manager\Enumerations\ImageFormats.cs" />
     <Compile Include="Manager\Enumerations\Locations.cs" />
     <Compile Include="Manager\Enumerations\Trendlines.cs" />
-    <Compile Include="BLO\TextRange.cs" />
     <Compile Include="Manager\TextRangeManager.cs" />
-    <Compile Include="BLO\TitleAndContentSlideHelper.cs" />
-    <Compile Include="BLO\SlideHelper.cs" />
     <Compile Include="BLO\PresentationBLO.cs" />
     <Compile Include="Manager\PowerPointApplicationManager.cs" />
     <Compile Include="Manager\PresentationManager.cs" />
