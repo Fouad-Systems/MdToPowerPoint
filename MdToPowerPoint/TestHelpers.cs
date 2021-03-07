@@ -4,6 +4,7 @@ using Microsoft.Office.Core;
 using PowerPointLibrary.Helper;
 using PowerPointLibrary.Helper.Contracts;
 using PowerPointLibrary.Helper.Enumerations;
+using PowerPointLibrary.Manager;
 using PPT = Microsoft.Office.Interop.PowerPoint;
 namespace MdToPowerPoint
 { 
@@ -35,14 +36,15 @@ namespace MdToPowerPoint
             // Step1. Create a PowerPoint application instance
             var powerPointApplication = PptApplicationManager.CreatePowerPointApplication();
 
+
             // Step2. Open an existing PowerPoint presentation
             var pptPresentation = PptPresentationManager.OpenExistingPowerPointPresentation(
                     powerPointApplication,
                     Environment.CurrentDirectory + ResourceFolder + TemplatePath);
 
             // Step3. Create two clones of our second slide (we will use this a lot)
-            PptSlideManager.CloneSlide(pptPresentation, pptPresentation.Slides[2], Locations.Location.Last);
-            PptSlideManager.CloneSlide(pptPresentation, pptPresentation.Slides[2], Locations.Location.Last);
+            PptSlideManager.CloneSlide(pptPresentation, pptPresentation.Slides[1], Locations.Location.Last);
+            PptSlideManager.CloneSlide(pptPresentation, pptPresentation.Slides[1], Locations.Location.Last);
 
             // Step4. Decorate Slides 1,2,3,4
             DecorateSlides(pptPresentation);
@@ -99,6 +101,11 @@ namespace MdToPowerPoint
 
         private static void DecorateSlideOne(PPT.Slide slide)
         {
+
+            var shape =   slide.Shapes["Contenue"];
+            shape.TextFrame.TextRange.Text = "Bonjour";
+
+
             // Insert the graphic for the slide
             var pictureShape = PptShapeManager.AddPicture(
                     slide,

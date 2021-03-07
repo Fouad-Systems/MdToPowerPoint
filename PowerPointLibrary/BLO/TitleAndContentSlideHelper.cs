@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PowerPointLibrary.Helpers
+namespace PowerPointLibrary.BLO
 {
     public class TitleAndContentSlideHelper : SlideHelper
     {
         public string CurrentShapesName { get; set; }
 
-        public TitleAndContentSlideHelper(PresentationHelper presentationHelper, int index):base(presentationHelper, index)
+        public TitleAndContentSlideHelper(PresentationBLO presentationHelper, int index):base(presentationHelper, index)
         {
             //ChangeLayout("Titre et contenu");
             ChangeLayout("Console 2");

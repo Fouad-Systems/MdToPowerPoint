@@ -1,4 +1,4 @@
-﻿namespace PowerPointLibrary.Helper
+﻿namespace PowerPointLibrary.Manager
 {
     using System.Collections.Generic;
     using System.Linq;

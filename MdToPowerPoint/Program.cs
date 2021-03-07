@@ -4,7 +4,7 @@ using Microsoft.Toolkit.Parsers.Markdown;
 using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 using Microsoft.Toolkit.Parsers.Markdown.Inlines;
 using PowerPointLibrary.Helper;
-using PowerPointLibrary.Helpers;
+using PowerPointLibrary.BLO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +19,12 @@ namespace MdToPowerPoint
     {
         static void Main(string[] args)
         {
-            AutoPresentation();
+
+            // new TemplateStructureBLO().CreateTemplateStructureExemple();
+
+
+            CreatePresenytation();
+
             // Clean up the unmanaged PowerPoint COM resources by forcing a  
             // garbage collection as soon as the calling function is off the  
             // stack (at which point these objects are no longer rooted). 
@@ -34,11 +39,9 @@ namespace MdToPowerPoint
 
         }
 
-        private static void AutoPresentation()
+        private static void CreatePresenytation()
         {
 
-
-          //  TestHelpers.Main1();
 
             // Load MarkDown File
             string BaseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -46,91 +49,26 @@ namespace MdToPowerPoint
             string md = sr.ReadToEnd();
 
 
-            // Parse
-            MarkdownDocument document = new MarkdownDocument();
-            document.Parse(md);
+            // Parse Markdonw file
+            MarkdownDocument mdDocument = new MarkdownDocument();
+            mdDocument.Parse(md);
 
 
-            PresentationHelper presentationHelper = new PresentationHelper();
-            presentationHelper.Create("template1.potm");
+            // Create presentation
+            PresentationBLO presentationBLO = new PresentationBLO();
+            presentationBLO.Create("template");
+
+            // Create Presentation DataStructure 
+            presentationBLO.CreatePresentationDataStructure(mdDocument);
 
 
-            int SlideIndex = 1;
-            bool newSlide = false;
-            TitleAndContentSlideHelper slide = null;
-            foreach (var element in document.Blocks)
-            {
-                if (element is HeaderBlock header)
-                {
 
-                    slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
-
-                    string Slide_name = slide.Slide.Name;
-                    int c = slide.Slide.Shapes.Count;
-                    string name = slide.Slide.Shapes[1].Name;
+            // Create Presentation from PresentationDataStructure
+            
+            presentationBLO.GeneratePresentation();
 
 
-                    TextRange TitleTextRange = slide.Slide.Shapes[1].TextFrame.TextRange;
-                    new TextRangeHelper(TitleTextRange).AddMarkdownBlock(element);
-
-                    //oText.Text = "Bonjour l'informatique";
-                    //oText.Words(1, 1).Find("Bonjour").Font.Bold = MsoTriState.msoCTrue;
-                    //oText.Words(1, 1).Find("Bonjour").Font.Size = 20;
-                    //oText =  oText.Words(1,1).InsertAfter(oText.Words(1, 1));
-
-                }
- 
-                if (element is ParagraphBlock Paragraph)
-                {
-                    if(Paragraph.Inlines[0].Type == MarkdownInlineType.Comment)
-                    {
-                        string comment = Paragraph.Inlines[0].ToString();
-
-                        // Change Slide layout
-                        if(comment.StartsWith("<!-- slide : "))
-                        {
-                            string layout = comment.Replace("<!-- slide : ", "");
-                            layout = layout.Replace("-->", "");
-                            layout = layout.Trim();
-                            // slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
-                            slide.ChangeLayout(layout);
-                        }
-
-                        // Change zone
-                        if (comment.StartsWith("<!-- zone : "))
-                        {
-                            string ShapesName = comment.Replace("<!-- zone : ", "");
-                            ShapesName = ShapesName.Replace("-->", "");
-                            ShapesName = ShapesName.Trim();
-                            // slide = new TitleAndContentSlideHelper(presentationHelper, SlideIndex++);
-                            slide.CurrentShapesName = ShapesName;
-                        }
-
-                    }
-
-                    TextRange TitleTextRange = slide.Slide.Shapes[2].TextFrame.TextRange;
-                    if (!string.IsNullOrEmpty(slide.CurrentShapesName))
-                    {
-                        string Slide_name = slide.Slide.Name;
-                        int c = slide.Slide.Shapes.Count;
-                        string name = slide.Slide.Shapes[1].Name;
-                         name  = slide.Slide.Shapes[2].Name;
-                        name = slide.Slide.Shapes[3].Name;
-                        TitleTextRange = slide.Slide.Shapes["Content Placeholder 6"].TextFrame.TextRange;
-                    }
-                   
-                    new TextRangeHelper(TitleTextRange).AddMarkdownBlock(element);
-                   
-                    
-                    
-                }
-
-            }
-
-
-            string fileName = BaseDir + "\\output.pptx";
-            presentationHelper.SaveAs(fileName);
-            presentationHelper.Close();
+            System.Diagnostics.Process.Start(Environment.CurrentDirectory);
 
         }
 

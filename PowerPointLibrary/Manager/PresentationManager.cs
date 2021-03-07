@@ -1,4 +1,4 @@
-﻿namespace PowerPointLibrary.Helper
+﻿namespace PowerPointLibrary.Manager
 {
     #region Using Directives
 

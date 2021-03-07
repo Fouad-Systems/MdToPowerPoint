@@ -1,34 +1,26 @@
-﻿using Microsoft.Office.Interop.PowerPoint;
-using Microsoft.Toolkit.Parsers.Markdown.Blocks;
+﻿using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 using Microsoft.Toolkit.Parsers.Markdown.Inlines;
+using PowerPointLibrary.Entities;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PowerPointLibrary.Helper
+namespace PowerPointLibrary.BLO
 {
-    public class TextRangeHelper
+    public class TextStructureBLO
     {
-        protected TextRange TextRange;
-
-        public TextRangeHelper(TextRange TextRange)
+        public TextStructure CreateFromMarkdownBlock(MarkdownBlock markdownBlock)
         {
-            this.TextRange = TextRange;
-        }
-
-        public void AddMarkdownBlock(MarkdownBlock markdownBlock)
-        {
-
+            TextStructure textStructure = new TextStructure();
             switch (markdownBlock.Type)
             {
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Root:
                     break;
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Paragraph:
                     Microsoft.Toolkit.Parsers.Markdown.Blocks.ParagraphBlock ParagraphBlock = markdownBlock as ParagraphBlock;
-                    this.AddInLindes(ParagraphBlock.Inlines);
+                    this.AddInLindesToTextStructure(textStructure, ParagraphBlock.Inlines);
                     break;
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Quote:
                     break;
@@ -37,7 +29,7 @@ namespace PowerPointLibrary.Helper
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Header:
 
                     HeaderBlock headerBlock = markdownBlock as HeaderBlock;
-                    this.AddInLindes(headerBlock.Inlines);
+                    this.AddInLindesToTextStructure(textStructure, headerBlock.Inlines);
 
                     break;
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.List:
@@ -55,36 +47,13 @@ namespace PowerPointLibrary.Helper
                 default:
                     break;
             }
- 
-        }
 
-       
-
-        public class TextElement
-        {
-            public enum TextStyles
-            {
-                Blod,
-                Italic
-            }
-            public int Start;
-            public int Length;
-            public TextStyles TextStyle;
-
-            public TextElement(int Start, int Length, TextStyles TextStyle)
-            {
-                this.Start = Start;
-                this.Length = Length;
-                this.TextStyle = TextStyle;
-            }
-          
+            return textStructure;
         }
 
 
-        protected void AddInLindes(IList<MarkdownInline> MarkdownInlines)
+        protected void AddInLindesToTextStructure(TextStructure textStructure, IList<MarkdownInline> MarkdownInlines)
         {
-
-            List<TextElement> TextElements = new List<TextElement>();
 
             foreach (var markdownInline in MarkdownInlines)
             {
@@ -95,32 +64,23 @@ namespace PowerPointLibrary.Helper
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.TextRun:
                         TextRunInline textRunInline = markdownInline as TextRunInline;
                         string text = textRunInline.Text;
-                        this.TextRange.InsertAfter(text);
+                        textStructure.Text += text;
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Bold:
-
-                      
-                        int Start = this.TextRange.Text.Count() + 1;
-                       
+                        int Start = textStructure.Text.Count() + 1;
                         Microsoft.Toolkit.Parsers.Markdown.Inlines.BoldTextInline boldTextInline = markdownInline as BoldTextInline;
                         string text_blod = (boldTextInline.Inlines[0] as TextRunInline).Text;
                         int Length = text_blod.Count();
-                        this.TextRange.InsertAfter(text_blod);
-
-                        TextElements.Add(new TextElement(Start, Length, TextElement.TextStyles.Blod));
-
-                       
-
-
-
+                        textStructure.Text +=  text_blod;
+                        textStructure.TextElementStyles.Add(new TextElementStyle(Start, Length, TextElementStyle.TextStyles.Blod));
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Italic:
-                        int StartItalic = this.TextRange.Text.Count() + 1;
+                        int StartItalic = textStructure.Text.Count() + 1;
                         Microsoft.Toolkit.Parsers.Markdown.Inlines.ItalicTextInline italicTextInline = markdownInline as ItalicTextInline;
                         string text_italic = (italicTextInline.Inlines[0] as TextRunInline).Text;
                         int Lengthitalic = text_italic.Count();
-                        this.TextRange.InsertAfter(text_italic);
-                        TextElements.Add(new TextElement(StartItalic, Lengthitalic, TextElement.TextStyles.Italic));
+                        textStructure.Text += text_italic;
+                        textStructure.TextElementStyles.Add(new TextElementStyle(StartItalic, Lengthitalic, TextElementStyle.TextStyles.Italic));
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.MarkdownLink:
                         break;
@@ -146,26 +106,6 @@ namespace PowerPointLibrary.Helper
                         break;
                 }
             }
-
-
-            foreach (var textElement in TextElements)
-            {
-
-                TextRange textRange = this.TextRange.Characters(textElement.Start, textElement.Length);
-                switch (textElement.TextStyle)
-                {
-                    case TextElement.TextStyles.Blod:
-                        textRange.Font.Bold = Microsoft.Office.Core.MsoTriState.msoCTrue;
-                        break;
-                    case TextElement.TextStyles.Italic:
-                        textRange.Font.Italic = Microsoft.Office.Core.MsoTriState.msoCTrue;
-                        break;
-                    default:
-                        break;
-                }
-               
-            }
-            
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PowerPointLibrary.Helpers
+namespace PowerPointLibrary.BLO
 {
 
    
@@ -17,14 +17,14 @@ namespace PowerPointLibrary.Helpers
 
     public class SlideHelper
     {
-        public PresentationHelper presentationHelper;
+        public PresentationBLO presentationHelper;
         public Slide Slide;
 
-        public SlideHelper(PresentationHelper presentationHelper, int index)
+        public SlideHelper(PresentationBLO presentationHelper, int index)
         {
             this.presentationHelper = presentationHelper;
-            Slide = presentationHelper.oPresentation.Slides.Add(index, PpSlideLayout.ppLayoutBlank);
-            Slide.CustomLayout = presentationHelper.oPresentation.Designs[1].SlideMaster.CustomLayouts[1];
+            Slide = presentationHelper._Presentation.Slides.Add(index, PpSlideLayout.ppLayoutBlank);
+            Slide.CustomLayout = presentationHelper._Presentation.Designs[1].SlideMaster.CustomLayouts[1];
           
         }
 
