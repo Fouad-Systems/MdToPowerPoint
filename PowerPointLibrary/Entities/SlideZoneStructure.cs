@@ -8,6 +8,10 @@ namespace PowerPointLibrary.Entities
 {
     public class SlideZoneStructure : ICloneable
     {
+        public override string ToString()
+        {
+            return this.Name;
+        }
         public string Name { get; set; }
 
         public TextStructure Text { get; set; }

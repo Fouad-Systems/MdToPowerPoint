@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using PowerPointLibrary.Exceptions;
 
 namespace MdToPowerPoint
 {
@@ -19,11 +20,24 @@ namespace MdToPowerPoint
     {
         static void Main(string[] args)
         {
-
+            string MdDocumentFileName = "introduction.md";
             // new TemplateStructureBLO().CreateTemplateStructureExemple();
 
+            if (args != null && args.Length > 0)
+            {
+                MdDocumentFileName = args[0];
 
-            CreatePresenytation();
+            }
+
+            string FilePath = Environment.CurrentDirectory + "\\" + MdDocumentFileName;
+            if (!File.Exists(FilePath))
+            {
+                string msg = $"The file ({FilePath}) doesn't exist";
+                throw new PplException(msg);
+            }
+
+
+            CreatePresenytation(MdDocumentFileName);
 
             // Clean up the unmanaged PowerPoint COM resources by forcing a  
             // garbage collection as soon as the calling function is off the  
@@ -39,13 +53,13 @@ namespace MdToPowerPoint
 
         }
 
-        private static void CreatePresenytation()
+        private static void CreatePresenytation(string MdDocumentFileName)
         {
 
 
             // Load MarkDown File
-            string BaseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            StreamReader sr = new StreamReader(BaseDir + "\\introduction.md");
+            string BaseDir = Environment.CurrentDirectory;
+            StreamReader sr = new StreamReader(BaseDir + "\\" + MdDocumentFileName);
             string md = sr.ReadToEnd();
 
 

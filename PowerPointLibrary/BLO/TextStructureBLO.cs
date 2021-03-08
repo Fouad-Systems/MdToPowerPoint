@@ -11,9 +11,12 @@ namespace PowerPointLibrary.BLO
 {
     public class TextStructureBLO
     {
-        public TextStructure CreateFromMarkdownBlock(MarkdownBlock markdownBlock)
+
+       
+
+        public TextStructure CreateAndAddFromMarkdownBlock(TextStructure textStructure, MarkdownBlock markdownBlock)
         {
-            TextStructure textStructure = new TextStructure();
+          
             switch (markdownBlock.Type)
             {
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Root:

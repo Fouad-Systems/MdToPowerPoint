@@ -44,6 +44,10 @@ namespace PowerPointLibrary.Entities
 
     public class TextStructure : ICloneable
     {
+        public override string ToString()
+        {
+            return this.Text;
+        }
         public string Text { get; set; }
 
 

@@ -51,7 +51,10 @@ namespace PowerPointLibrary.BLO
                 }
             }
 
-
+            if (slideStructure.SlideZones.Count > 0)
+                slideStructure.CurrentZone = slideStructure.SlideZones.First();
+            else
+                slideStructure.CurrentZone = null;
         }
 
         public void ChangeCurrentZone(SlideStructure currentSlide, string zoneName)

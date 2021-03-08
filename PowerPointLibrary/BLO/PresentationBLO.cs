@@ -122,7 +122,11 @@ namespace PowerPointLibrary.BLO
                     SlideZoneStructure zoneTitle = this.CurrentSlide.CurrentZone;
                 
                     if (zoneTitle != null)
-                        zoneTitle.Text = _TextStructureBLO.CreateFromMarkdownBlock(header);
+                    {
+                        if (zoneTitle.Text == null) zoneTitle.Text = new TextStructure();
+                        _TextStructureBLO.CreateAndAddFromMarkdownBlock(zoneTitle.Text, header);
+                    }
+                        
 
                 }
 
@@ -160,13 +164,16 @@ namespace PowerPointLibrary.BLO
                         
                         if (this.CurrentSlide.CurrentZone != null)
                         {
-                            this.CurrentSlide.CurrentZone.Text = _TextStructureBLO.CreateFromMarkdownBlock(Paragraph);
+                            if (this.CurrentSlide.CurrentZone.Text == null) this.CurrentSlide.CurrentZone.Text = new TextStructure();
+                             _TextStructureBLO.CreateAndAddFromMarkdownBlock(this.CurrentSlide.CurrentZone.Text, Paragraph);
                         }
                         else
                         {
                             if (this.CurrentSlide.AddToNotes)
                             {
-                                this.CurrentSlide.Notes.Text = _TextStructureBLO.CreateFromMarkdownBlock(Paragraph);
+
+                                //if (this.CurrentSlide.CurrentZone.Text == null) this.CurrentSlide.CurrentZone.Text = new TextStructure();
+                                //_TextStructureBLO.CreateAndAddFromMarkdownBlock(this.CurrentSlide.CurrentZone.Text, Paragraph);
 
                             }
                         }
