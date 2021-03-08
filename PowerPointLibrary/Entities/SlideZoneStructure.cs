@@ -16,12 +16,17 @@ namespace PowerPointLibrary.Entities
 
         public TextStructure Text { get; set; }
 
+        public List<ImageStructure> Images { get; set; }
+
         public object Clone()
         {
             SlideZoneStructure clone = new SlideZoneStructure();
             clone.Name = Name;
             if (Text != null)
                 clone.Text = Text.Clone() as TextStructure;
+
+            if (Image != null)
+                clone.Images = Images.
             return clone;
 
         }

@@ -26,6 +26,24 @@ namespace PowerPointLibrary.Manager
                     case TextElementStyle.TextStyles.Italic:
                         textRangePart.Font.Italic = Microsoft.Office.Core.MsoTriState.msoCTrue;
                         break;
+                    case TextElementStyle.TextStyles.Bullet:
+                        switch (textElement.ListStyle)
+                        {
+                            case Microsoft.Toolkit.Parsers.Markdown.ListStyle.Bulleted:
+                                textRangePart.ParagraphFormat.Bullet.Type = PpBulletType.ppBulletUnnumbered;
+                                textRangePart.ParagraphFormat.Bullet.Character = 9632;
+
+                                textRangePart.ParagraphFormat.Bullet.Visible = Microsoft.Office.Core.MsoTriState.msoCTrue;
+                                break;
+                            case Microsoft.Toolkit.Parsers.Markdown.ListStyle.Numbered:
+                                textRangePart.ParagraphFormat.Bullet.Type = PpBulletType.ppBulletNumbered;
+                                textRangePart.ParagraphFormat.Bullet.Visible = Microsoft.Office.Core.MsoTriState.msoCTrue;
+                               // textRangePart.ParagraphFormat.Bullet.Style = PpNumberedBulletStyle.ppBulletCircleNumDBPlain;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
                     default:
                         break;
                 }

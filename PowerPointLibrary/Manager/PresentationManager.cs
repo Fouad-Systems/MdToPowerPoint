@@ -56,7 +56,7 @@
                 PPT.Application powerPointApplication,
                 string pathAndFileName)
         {
-            return powerPointApplication.Presentations.Open(pathAndFileName, oFalse, oFalse, oTrue);
+            return powerPointApplication.Presentations.Open(pathAndFileName, oFalse, oFalse, oFalse);
         }
 
         /// <summary>

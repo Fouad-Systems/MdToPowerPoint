@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Parsers.Markdown;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,11 +15,13 @@ namespace PowerPointLibrary.Entities
         public enum TextStyles
         {
             Blod,
-            Italic
+            Italic,
+            Bullet
         }
         public int Start;
         public int Length;
         public TextStyles TextStyle;
+        public ListStyle ListStyle;
 
         public TextElementStyle()
         {
@@ -44,6 +47,7 @@ namespace PowerPointLibrary.Entities
 
     public class TextStructure : ICloneable
     {
+
         public override string ToString()
         {
             return this.Text;
@@ -52,6 +56,12 @@ namespace PowerPointLibrary.Entities
 
 
         public List<TextElementStyle> TextElementStyles = new List<TextElementStyle>();
+
+
+        public TextStructure()
+        {
+            Text = "";
+        }
 
         public object Clone()
         {
