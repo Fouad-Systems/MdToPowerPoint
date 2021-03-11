@@ -14,7 +14,7 @@ namespace PowerPointLibrary.BLO
 
     public class PresentationStructureBLO
     {
-        public void CreateTemplateStructureExemple()
+        public static void CreateTemplateStructureExemple()
         {
 
             PresentationStructure templateStructure = new PresentationStructure();
@@ -24,6 +24,9 @@ namespace PowerPointLibrary.BLO
             slide1.Order = 1;
             slide1.SlideZones.Add(new SlideZoneStructure() { Name = "zone1" });
             slide1.SlideZones.Add(new SlideZoneStructure() { Name = "zone2" });
+            //slide1.ContentTypes.Add(Entities.Enums.ContentTypes.Title);
+            //slide1.ContentTypes.Add(Entities.Enums.ContentTypes.Text);
+
 
             SlideStructure slide2 = new SlideStructure();
             slide2.Name = "Slide 2";
@@ -35,7 +38,7 @@ namespace PowerPointLibrary.BLO
             templateStructure.Slides.Add(slide1);
             templateStructure.Slides.Add(slide2);
 
-            File.WriteAllText(@"template.json", JsonConvert.SerializeObject(templateStructure));
+            File.WriteAllText(@"exemple-template.json", JsonConvert.SerializeObject(templateStructure));
 
             
         }
@@ -48,6 +51,19 @@ namespace PowerPointLibrary.BLO
 
             var obj = JsonConvert.DeserializeObject(code, typeof(PresentationStructure));
             PresentationStructure templateStructure = obj as PresentationStructure;
+
+            // Calculate Zone Order 
+
+            foreach (var slide in templateStructure.Slides)
+            {
+                int order = 1;
+                foreach (var slideZone in slide.SlideZones)
+                {
+                    slideZone.Order = order++ ;
+                }
+
+            }
+
             return templateStructure;
         }
     }

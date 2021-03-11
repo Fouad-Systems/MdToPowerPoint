@@ -103,17 +103,26 @@ namespace MdToPowerPoint
         {
 
             var shape =   slide.Shapes["Contenue"];
-            shape.TextFrame.TextRange.Text = "Bonjour";
-
+            // shape.TextFrame.TextRange.Text = "Bonjour";
+            shape.Delete();
+           
 
             // Insert the graphic for the slide
             var pictureShape = PptShapeManager.AddPicture(
                     slide,
                     Environment.CurrentDirectory + ResourceFolder + Slide1Graphic,
-                    100f,
-                    220f,
+                    0,
+                    0,
                     200f,
                     200f);
+
+           PptShapeManager.AddPicture(
+                   slide,
+                   Environment.CurrentDirectory + ResourceFolder + Slide1Graphic,
+                   100f,
+                   220f,
+                   200f,
+                   200f);
 
             // Insert the graphic for the slide
             var pictureShape2 = PptShapeManager.AddPicture(

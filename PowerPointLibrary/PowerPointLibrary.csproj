@@ -65,12 +65,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BLO\CommentActionBLO.cs" />
+    <Compile Include="BLO\ParagraphBlockBLO.cs" />
     <Compile Include="BLO\PplArgumentsBLO.cs" />
     <Compile Include="BLO\PresentationStructureBLO.cs" />
     <Compile Include="BLO\SlideBLO.cs" />
     <Compile Include="BLO\SlideZoneStructureBLO.cs" />
     <Compile Include="BLO\TextStructureBLO.cs" />
     <Compile Include="Entities\CommentAction.cs" />
+    <Compile Include="Entities\Enums\ContentTypes.cs" />
     <Compile Include="Entities\ImageStructure.cs" />
     <Compile Include="Entities\PplArguments.cs" />
     <Compile Include="Entities\SlideStructure.cs" />

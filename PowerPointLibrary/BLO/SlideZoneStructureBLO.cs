@@ -86,7 +86,9 @@ namespace PowerPointLibrary.BLO
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.TextRun:
                         TextRunInline textRunInline = markdownInline as TextRunInline;
-                        string text = textRunInline.Text;
+
+                        // in head , a space is auto-added, we must delete it
+                        string text = textRunInline.Text.Trim();
                         SlideZone.Text.Text += text;
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Bold:

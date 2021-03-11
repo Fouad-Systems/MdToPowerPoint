@@ -18,7 +18,9 @@ namespace PowerPointLibrary.Entities
             Empty,
             ChangeLayout,
             ChangeZone,
-            NewSlide
+            NewSlide,
+            Note,
+            EndNote
         }
 
         public string Comment { get; set; }

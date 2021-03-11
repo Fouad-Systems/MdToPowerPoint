@@ -19,13 +19,16 @@ namespace PowerPointLibrary.BLO
             // The possible actions
             // <!-- layout : Titre et contenu --> : change layout
             // <!-- zone : Colone 1 --> : define zone
-            // <!-- zone : Notes --> : change zone to notes
+            // <!-- note --> : write to zone to notes
+            // <!-- end note --> : switch to wrtie to zone
             // <!-- new slide : Titre et contenu -->
             // <!-- new slide -->
 
             if (
                 comment.StartsWith("<!-- layout :", true, null) ||
                 comment.StartsWith("<!-- zone :", true, null) ||
+                comment.StartsWith("<!-- note -->", true, null) ||
+                comment.StartsWith("<!-- end note -->", true, null) ||
                 comment.StartsWith("<!-- new slide", true, null)
                 )
                 return true;
@@ -36,6 +39,7 @@ namespace PowerPointLibrary.BLO
 
         public CommentAction ParseComment(string comment)
         {
+           
             if (!this.IsAction(comment)) return null;
 
             CommentAction commentAction = null;
@@ -61,8 +65,18 @@ namespace PowerPointLibrary.BLO
                 string Layout = comment.Replace("<!-- new slide :", "").Replace("-->", "").Trim();
                 commentAction.Layout = Layout;
             }
-
-
+            if (comment.StartsWith("<!-- note -->", true, null))
+            {
+                commentAction = new CommentAction(comment);
+                commentAction.ActionType = CommentAction.ActionTypes.Note;
+                commentAction.ZoneName = null;
+            }
+            if (comment.StartsWith("<!-- end note", true, null))
+            {
+                commentAction = new CommentAction(comment);
+                commentAction.ActionType = CommentAction.ActionTypes.EndNote;
+                commentAction.ZoneName = null;
+            }
 
             return commentAction;
         }

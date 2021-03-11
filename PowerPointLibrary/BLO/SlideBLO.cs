@@ -19,6 +19,14 @@ namespace PowerPointLibrary.BLO
             this._PresentationBLO = _PresentationBLO;
         }
 
+        public SlideStructure CurrentSlide
+        {
+            get
+            {
+                return _PresentationBLO.CurrentSlide;
+            }
+        }
+
         public void ChangeLayout(SlideStructure slideStructure, string layout)
         {
             slideStructure.Layout = layout;
@@ -59,22 +67,14 @@ namespace PowerPointLibrary.BLO
 
         public void ChangeCurrentZone(SlideStructure currentSlide, string zoneName)
         {
-            if(zoneName.ToLower() == "notes")
+            SlideZoneStructure CurrentZone = currentSlide.SlideZones.Where(z => z.Name == zoneName).FirstOrDefault();
+            if (CurrentZone == null)
             {
-                currentSlide.CurrentZone = null;
-                currentSlide.AddToNotes = true;
+                string msg = $"The zone name {zoneName} doesn't exist";
+                throw new PowerPointLibrary.Exceptions.PplException(msg);
             }
-            else
-            {
-                SlideZoneStructure CurrentZone = currentSlide.SlideZones.Where(z => z.Name == zoneName).FirstOrDefault();
-                if (CurrentZone == null)
-                {
-                    string msg = $"The zone name {zoneName} doesn't exist";
-                    throw new PowerPointLibrary.Exceptions.PplException(msg);
-                }
-                currentSlide.CurrentZone = CurrentZone;
-            }
-           
+            currentSlide.CurrentZone = CurrentZone;
+
         }
 
         public void AddSlide(string Layout)
@@ -97,25 +97,69 @@ namespace PowerPointLibrary.BLO
             slideStructure.TemplateSlide = TemplateSlide;
             slideStructure.SlideZones = TemplateSlide.SlideZones.Select(s => s.Clone() as SlideZoneStructure).ToList();
 
-            slideStructure.CurrentZone = slideStructure.SlideZones.Where(z=>z.Name == SlideBLO.ZoneTitleName).FirstOrDefault();
+            
         }
 
-        public void ChangeZoneToParagraphe()
+
+        public void WriteToTitleZone()
         {
-            if (_PresentationBLO._PresentationStructure.CurrentSlide.CurrentZone != null &&  _PresentationBLO._PresentationStructure.CurrentSlide.CurrentZone.Name == SlideBLO.ZoneTitleName)
+            int CurrentZoneOrder = 0;
+            if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+
+
+            this.CurrentSlide.CurrentZone = this.CurrentSlide
+                .SlideZones.Where(s=>s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                .FirstOrDefault();
+        }
+
+
+        public void WriteToTextZone()
+        {
+            // Change if we are in zone title or image zone
+
+            if(this.CurrentSlide.CurrentZone == null || 
+                ! this.CurrentSlide.CurrentZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
             {
-                if (_PresentationBLO._PresentationStructure.CurrentSlide.SlideZones.Count > 1)
-                {
-                    var CurrentZone = _PresentationBLO._PresentationStructure.CurrentSlide.SlideZones[1];
-                   _PresentationBLO._PresentationStructure.CurrentSlide.CurrentZone = CurrentZone;
-                }
-                else
-                {
-                    _PresentationBLO._PresentationStructure.CurrentSlide.CurrentZone = null;
-                }
+
+                int CurrentZoneOrder = 0;
+                if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+
+                this.CurrentSlide.CurrentZone = this.CurrentSlide
+              .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
+              .FirstOrDefault();
             }
+           
 
                
+        }
+
+        public void WriteToImageZone()
+        {
+
+
+            int CurrentZoneOrder = 0;
+            if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+
+            this.CurrentSlide.CurrentZone = this.CurrentSlide
+         .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image))
+         .FirstOrDefault();
+
+
+
+
+
+
+
+        }
+
+        public void StartWriteToNote()
+        {
+            _PresentationBLO.CurrentSlide.AddToNotes = true;
+        }
+
+        public void EndWriteToNote()
+        {
+            _PresentationBLO.CurrentSlide.AddToNotes = false;
         }
     }
 }

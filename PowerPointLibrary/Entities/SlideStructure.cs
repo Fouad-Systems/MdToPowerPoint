@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using PowerPointLibrary.Entities.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +9,14 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.Entities
 {
+
+
+
+
     public class SlideStructure
     {
+
+
         public string Name { get; set; }
 
         public string Layout { get; set; }
@@ -24,11 +33,19 @@ namespace PowerPointLibrary.Entities
         public SlideZoneStructure Notes { set; get; }
         public bool AddToNotes { get; internal set; }
 
+      
+     
+
         public SlideStructure()
+
+
         {
+
+           
             this.SlideZones = new List<SlideZoneStructure>();
             Notes = new SlideZoneStructure();
             Notes.Name = "Notes";
+          
         }
     }
 }

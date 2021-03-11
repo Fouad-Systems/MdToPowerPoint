@@ -22,19 +22,17 @@ namespace PowerPointLibrary.BLO
     public class PresentationBLO
     {
 
+        #region Attributes
         internal Application _Application;
         internal Presentation _Presentation;
         internal PresentationStructure _TemplateStructure;
         internal PresentationStructure _PresentationStructure;
 
-        #region Manager
         private readonly PowerPointApplicationManager _ApplicationManager;
         private readonly PresentationManager _PresentationManager;
         private readonly SlideManager _SlideManager;
         private readonly ShapesManager _ShapeManager;
         private readonly TextRangeManager _TextRangeManager;
-
-        #endregion
 
         private readonly PresentationStructureBLO _TemplateStructureBLO;
         private readonly TextStructureBLO _TextStructureBLO;
@@ -43,6 +41,8 @@ namespace PowerPointLibrary.BLO
         private readonly SlideZoneStructureBLO _SlideZoneStructureBLO;
 
         public PplArguments pplArguments;
+        #endregion
+
         public PresentationBLO(PplArguments pplArguments)
         {
             this.pplArguments = pplArguments;
@@ -121,12 +121,10 @@ namespace PowerPointLibrary.BLO
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.CodeBlock code)
                 {
-
                 }
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.LinkReferenceBlock LinkReference)
                 {
-
                 }
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.ListBlock List)
@@ -137,7 +135,6 @@ namespace PowerPointLibrary.BLO
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.QuoteBlock Quote)
                 {
-
                 }
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.TableBlock Table)
@@ -147,11 +144,16 @@ namespace PowerPointLibrary.BLO
 
                 if (element is HeaderBlock header)
                 {
+                  
+
                     string layout = "";
                     if (header.HeaderLevel == 1) layout = "Titre partie";
                     if (header.HeaderLevel >= 2) layout = "Titre et contenu";
 
                     _SlideBLO.AddSlide(layout);
+                    _SlideBLO.WriteToTitleZone();
+
+
 
                     SlideZoneStructure zoneTitle = this.CurrentSlide.CurrentZone;
 
@@ -162,12 +164,9 @@ namespace PowerPointLibrary.BLO
                     }
                 }
 
-
                 if (element is ParagraphBlock Paragraph)
                 {
-
-                    _SlideBLO.ChangeZoneToParagraphe();
-
+  
                     // if paragraphe is action
                     if (Paragraph.Inlines[0].Type == MarkdownInlineType.Comment
                         && _CommentActionBLO.IsAction(Paragraph.Inlines[0].ToString()))
@@ -190,36 +189,60 @@ namespace PowerPointLibrary.BLO
                             case CommentAction.ActionTypes.NewSlide:
                                 _SlideBLO.AddSlide(commentAction.Layout);
                                 break;
+
+                            case CommentAction.ActionTypes.Note:
+                                _SlideBLO.StartWriteToNote();
+                                break;
+                            case CommentAction.ActionTypes.EndNote:
+                                _SlideBLO.EndWriteToNote();
+                                break;
+                            case CommentAction.ActionTypes.Empty:
+                                break;
                         }
                     }
                     else
                     {
 
-                        if (this.CurrentSlide.CurrentZone != null)
+                        if (this.CurrentSlide.AddToNotes)
                         {
-                            if (this.CurrentSlide.CurrentZone.Text == null)
-                                this.CurrentSlide.CurrentZone.Text = new TextStructure();
 
-                            // return à la ligne si une nouvelle paragraphe est ajouté
-                            int count_befor = this.CurrentSlide.CurrentZone.Text.Text.Count();
-                            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, Paragraph);
-                            if (this.CurrentSlide.CurrentZone.Text.Text.Count() > count_befor)
-                                this.CurrentSlide.CurrentZone.Text.Text += "\r";
+                            if (this.CurrentSlide.Notes == null) this.CurrentSlide.Notes = new SlideZoneStructure();
+                            if (this.CurrentSlide.Notes.Text == null) this.CurrentSlide.Notes.Text = new TextStructure();
 
+                            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.Notes, Paragraph);
 
                         }
                         else
                         {
-                            if (this.CurrentSlide.AddToNotes)
+
+                            if (new ParagraphBlockBLO().IsImage(Paragraph))
                             {
+                                _SlideBLO.WriteToImageZone();
+                            }
+                            else
+                            {
+                                _SlideBLO.WriteToTextZone();
+                            }
 
-                                if (this.CurrentSlide.Notes == null) this.CurrentSlide.Notes = new SlideZoneStructure();
-                                if (this.CurrentSlide.Notes.Text == null) this.CurrentSlide.Notes.Text = new TextStructure();
+                            if (this.CurrentSlide.CurrentZone != null)
+                            {
+                                if (this.CurrentSlide.CurrentZone.Text == null)
+                                    this.CurrentSlide.CurrentZone.Text = new TextStructure();
 
-                                _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.Notes, Paragraph);
+                                // return à la ligne si une nouvelle paragraphe est ajouté
+                                int count_befor = this.CurrentSlide.CurrentZone.Text.Text.Count();
+                                _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, Paragraph);
+                                if (this.CurrentSlide.CurrentZone.Text.Text.Count() > count_befor)
+                                    this.CurrentSlide.CurrentZone.Text.Text += "\r";
+
 
                             }
+
                         }
+
+
+                      
+                       
 
                     }
 
@@ -228,8 +251,6 @@ namespace PowerPointLibrary.BLO
 
             }
         }
-
-
 
         public void GeneratePresentation()
         {
@@ -250,65 +271,85 @@ namespace PowerPointLibrary.BLO
                     _TextRangeManager.AddTextStructure(currentSlide.NotesPage.Shapes.Placeholders[2].TextFrame.TextRange, slide.Notes.Text);
                 // slideRange.NotesPage
 
-
+               
 
                 foreach (var SlideZone in slide.SlideZones)
                 {
-                    // Add Text
-                    if (SlideZone.Text != null)
-                    {
-                        Microsoft.Office.Interop.PowerPoint.Shape shape = slideRange.Shapes[SlideZone.Name];
-                        //   shape.Fill.UserPicture( Environment.CurrentDirectory +  "/images/informatique.jpg");
 
+
+                    //List<string> zones = new List<string>();
+                    //foreach (Microsoft.Office.Interop.PowerPoint.Shape item in slideRange.Shapes)
+                    //{
+                    //    zones.Add(item.Name);
+                    //}
+
+
+                    Microsoft.Office.Interop.PowerPoint.Shape shape = slideRange.Shapes[SlideZone.Name];
+                    //   shape.Fill.UserPicture( Environment.CurrentDirectory +  "/images/informatique.jpg");
+
+
+           
+
+
+                    if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
+                    {
+
+                        _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
+
+                        if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                        {
+                            shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                        }
                        
+                    }
+
+                    if (SlideZone.Images != null && SlideZone.Images.Count > 0)
+                    {
                         float shapeWidth = shape.Width;
                         float shapeHeight = shape.Height;
                         float shapeLeft = shape.Left;
                         float shapeTop = shape.Top;
-                        if (SlideZone.Text != null)
-                        {
-                            _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
-                        }
 
-                        if (SlideZone.Images != null && SlideZone.Images.Count > 0)
+                        // il faut supprimer "shape" si non AddPicture va remplater le shpae par image 
+                        // sans prendre en considération with et height
+
+                        // shape.Delete(); if yout delet a shape PowerPoit will rename the other shape
+                        // add empty string for AddPicture to Word Correctly with with et and height
+                        // shape.TextFrame.TextRange.Text = "aaaaaaaa a ";
+
+                        foreach (var image in SlideZone.Images)
                         {
 
-                            foreach (var image in SlideZone.Images)
+                            float imageHeight = 0;
+                            float imageWidth = 0;
+                            string file = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
+                            using (var img = Image.FromFile(file))
                             {
-
-                                float imageHeight = 0;
-                                float imageWidth = 0;
-                                string file = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
-                                using (var img = Image.FromFile(file))
-                                {
-                                    imageHeight = img.Height;
-                                    imageWidth = img.Width;
-                                }
-
-                                float scale = Math.Min(shapeWidth / imageWidth, shapeHeight / imageHeight);
-
-                                float scaledWidth = imageWidth * scale;
-                                float scaledHeight = imageHeight * scale;
-
-
-                                float left = (shapeWidth - scaledWidth) / 2 + shapeLeft;
-                                float top = (shapeHeight - scaledHeight) / 2 + shapeTop;
-
-                                // _ShapeManager.AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
-                                file = @"E:\formations\formation-git-github\src\images\10.jpg";
-                                _ShapeManager.AddPicture(currentSlide, file, 10f,10f, 100f, 100f);
+                                imageHeight = img.Height;
+                                imageWidth = img.Width;
                             }
 
+                            float scale = Math.Min(shapeWidth / imageWidth, shapeHeight / imageHeight);
+
+                            float scaledWidth = imageWidth * scale;
+                            float scaledHeight = imageHeight * scale;
 
 
+                            float left = (shapeWidth - scaledWidth) / 2 + shapeLeft;
+                            float top = (shapeHeight - scaledHeight) / 2 + shapeTop;
 
-                            // _ShapeManager.AddPicture(currentSlide, file, shape.Left, shape.Top, imageWidth, imageHeight); ;
+                            Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager.AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
+
+                           //  image_shape.AnimationSettings.AnimationOrder = 1;
+                            image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                            //file = @"E:\formations\formation-git-github\src\images\10.jpg";
+                            // _ShapeManager.AddPicture(currentSlide, file, 10f,10f, 100f, 100f);
                         }
 
 
 
 
-
+                        // _ShapeManager.AddPicture(currentSlide, file, shape.Left, shape.Top, imageWidth, imageHeight); ;
                     }
                 }
 
