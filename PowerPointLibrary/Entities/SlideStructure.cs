@@ -20,6 +20,13 @@ namespace PowerPointLibrary.Entities
         public string Name { get; set; }
 
         public string Layout { get; set; }
+
+        /// <summary>
+        /// Is layout changed by Action 
+        /// </summary>
+        public bool IsLayoutChangedByAction { get; internal set; }
+
+
         public int Order { get; set; }
         public List<SlideZoneStructure> SlideZones { get; set; }
       
@@ -33,15 +40,17 @@ namespace PowerPointLibrary.Entities
         public SlideZoneStructure Notes { set; get; }
         public bool AddToNotes { get; internal set; }
 
-      
-     
+        /// <summary>
+        /// Indicate the slide number to be used from the file OutputfileName.slides.pptx
+        /// </summary>
+        public int UseSlideOrder { get; set; }
+       
 
         public SlideStructure()
-
-
         {
 
-           
+            UseSlideOrder = 0;
+
             this.SlideZones = new List<SlideZoneStructure>();
             Notes = new SlideZoneStructure();
             Notes.Name = "Notes";

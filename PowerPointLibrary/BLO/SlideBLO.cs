@@ -37,7 +37,7 @@ namespace PowerPointLibrary.BLO
             var TemplateSlide = _PresentationBLO._TemplateStructure
                 .Slides.Where(s => s.Layout == layout).FirstOrDefault();
 
-            if(TemplateSlide == null)
+            if (TemplateSlide == null)
             {
                 string msg = $"The layout {layout} doesn't exist";
                 throw new PplException(msg);
@@ -55,6 +55,7 @@ namespace PowerPointLibrary.BLO
                     if (slideStructure.SlideZones[i].Name == oldSlideZone.Name)
                     {
                         slideStructure.SlideZones[i] = oldSlideZone;
+                        slideStructure.Order = i + 1;
                     }
                 }
             }
@@ -97,7 +98,7 @@ namespace PowerPointLibrary.BLO
             slideStructure.TemplateSlide = TemplateSlide;
             slideStructure.SlideZones = TemplateSlide.SlideZones.Select(s => s.Clone() as SlideZoneStructure).ToList();
 
-            
+
         }
 
 
@@ -108,7 +109,7 @@ namespace PowerPointLibrary.BLO
 
 
             this.CurrentSlide.CurrentZone = this.CurrentSlide
-                .SlideZones.Where(s=>s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
                 .FirstOrDefault();
         }
 
@@ -117,8 +118,8 @@ namespace PowerPointLibrary.BLO
         {
             // Change if we are in zone title or image zone
 
-            if(this.CurrentSlide.CurrentZone == null || 
-                ! this.CurrentSlide.CurrentZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
+            if (this.CurrentSlide.CurrentZone == null ||
+                !this.CurrentSlide.CurrentZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
             {
 
                 int CurrentZoneOrder = 0;
@@ -128,9 +129,9 @@ namespace PowerPointLibrary.BLO
               .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
               .FirstOrDefault();
             }
-           
 
-               
+
+
         }
 
         public void WriteToImageZone()
@@ -144,11 +145,38 @@ namespace PowerPointLibrary.BLO
          .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image))
          .FirstOrDefault();
 
+            //// Change layout to another layout that have a free space for the new image
+            //if (this.CurrentSlide.CurrentZone == null && !this.CurrentSlide.IsLayoutChangedByAction)
+            //{
+            //    var ImageLayout = _PresentationBLO
+            //        ._TemplateStructure
+            //        .Slides
+            //        .Where(s => s.SlideZones
+            //           .Where(z => 
+                       
+            //              z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image) 
+            //             ||
 
+            //             z.ContentTypes.Contains(Entities.Enums.ContentTypes.Text)
 
+            //           )
+            //           .Count() >= 2
 
+            //        )
+            //       .Where(ss => ss.SlideZones.Where(zz => zz.ContentTypes.Contains(Entities.Enums.ContentTypes.Image)).FirstOrDefault() != null )
 
+            //       .FirstOrDefault();
 
+            //    if (ImageLayout != null)
+            //    {
+            //        this.ChangeLayout(this.CurrentSlide, ImageLayout.Name);
+
+            //        this.CurrentSlide.CurrentZone = this.CurrentSlide
+            // .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image))
+            // .FirstOrDefault();
+            //    }
+                  
+            //}
 
         }
 
@@ -160,6 +188,11 @@ namespace PowerPointLibrary.BLO
         public void EndWriteToNote()
         {
             _PresentationBLO.CurrentSlide.AddToNotes = false;
+        }
+
+        public void UseSlide(CommentAction commentAction)
+        {
+            this.CurrentSlide.UseSlideOrder = commentAction.UseSlideOrder;
         }
     }
 }

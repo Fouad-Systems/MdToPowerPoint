@@ -23,13 +23,15 @@ namespace PowerPointLibrary.BLO
             // <!-- end note --> : switch to wrtie to zone
             // <!-- new slide : Titre et contenu -->
             // <!-- new slide -->
+            // <!-- use : slide 1 --> : use Slide 1 that exist in the file : OutputfileName.slides.pptx
 
             if (
                 comment.StartsWith("<!-- layout :", true, null) ||
                 comment.StartsWith("<!-- zone :", true, null) ||
                 comment.StartsWith("<!-- note -->", true, null) ||
                 comment.StartsWith("<!-- end note -->", true, null) ||
-                comment.StartsWith("<!-- new slide", true, null)
+                comment.StartsWith("<!-- new slide", true, null) ||
+                 comment.StartsWith("<!-- use : slide", true, null)
                 )
                 return true;
             else
@@ -76,6 +78,16 @@ namespace PowerPointLibrary.BLO
                 commentAction = new CommentAction(comment);
                 commentAction.ActionType = CommentAction.ActionTypes.EndNote;
                 commentAction.ZoneName = null;
+            }
+            if (comment.StartsWith("<!-- use : slide", true, null))
+            {
+                commentAction = new CommentAction(comment);
+                commentAction.ActionType = CommentAction.ActionTypes.UseSlide;
+                string stringSlideOrder = comment.Replace("<!-- use : slide", "").Replace("-->", "");
+
+                int SlideOrder = Convert.ToInt32(stringSlideOrder.Trim());
+
+                commentAction.UseSlideOrder = SlideOrder;
             }
 
             return commentAction;

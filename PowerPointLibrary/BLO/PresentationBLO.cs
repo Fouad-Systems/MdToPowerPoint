@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 using PowerPointLibrary.Helper.Enumerations;
 using System.Drawing;
+using PowerPointLibrary.Exceptions;
 
 namespace PowerPointLibrary.BLO
 {
@@ -116,8 +117,49 @@ namespace PowerPointLibrary.BLO
         public void CreatePresentationDataStructure(MarkdownDocument mdDocument)
         {
 
+            // il faut d'abord, trouver le nombre des slides avec le nombre de type de contenue dans 
+            // chaque slide
+
+            // ensuite choisir la layout convenable pour chaque contenue 
+
+            // ensuite read data frm mdDocument o PresentationDataStrucure
+
+
+
             foreach (var element in mdDocument.Blocks)
             {
+                if (element is HeaderBlock header)
+                {
+
+                    if (header.HeaderLevel <= 2)
+                    {
+                        string layout = "";
+                        if (header.HeaderLevel == 1) layout = "Titre partie";
+                        if (header.HeaderLevel >= 2) layout = "Titre et contenu";
+
+                        _SlideBLO.AddSlide(layout);
+                        _SlideBLO.WriteToTitleZone();
+
+                        SlideZoneStructure zoneTitle = this.CurrentSlide.CurrentZone;
+
+                        if (zoneTitle != null)
+                        {
+                            if (zoneTitle.Text == null) zoneTitle.Text = new TextStructure();
+                            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(zoneTitle, header);
+                        }
+                    }
+                    else
+                    {
+                        _SlideBLO.WriteToTextZone();
+                        SlideZoneStructure zoneTitle = this.CurrentSlide.CurrentZone;
+                        _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(zoneTitle, header);
+                    }
+
+                   
+                }
+
+
+                if (this.CurrentSlide.UseSlideOrder != 0) continue;
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.CodeBlock code)
                 {
@@ -142,28 +184,7 @@ namespace PowerPointLibrary.BLO
 
                 }
 
-                if (element is HeaderBlock header)
-                {
-                  
-
-                    string layout = "";
-                    if (header.HeaderLevel == 1) layout = "Titre partie";
-                    if (header.HeaderLevel >= 2) layout = "Titre et contenu";
-
-                    _SlideBLO.AddSlide(layout);
-                    _SlideBLO.WriteToTitleZone();
-
-
-
-                    SlideZoneStructure zoneTitle = this.CurrentSlide.CurrentZone;
-
-                    if (zoneTitle != null)
-                    {
-                        if (zoneTitle.Text == null) zoneTitle.Text = new TextStructure();
-                        _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(zoneTitle, header);
-                    }
-                }
-
+               
                 if (element is ParagraphBlock Paragraph)
                 {
   
@@ -179,6 +200,8 @@ namespace PowerPointLibrary.BLO
                         switch (commentAction.ActionType)
                         {
                             case CommentAction.ActionTypes.ChangeLayout:
+
+                                this.CurrentSlide.IsLayoutChangedByAction = true;
                                 _SlideBLO
                                     .ChangeLayout(this.CurrentSlide, commentAction.Layout);
                                 break;
@@ -197,6 +220,9 @@ namespace PowerPointLibrary.BLO
                                 _SlideBLO.EndWriteToNote();
                                 break;
                             case CommentAction.ActionTypes.Empty:
+                                break;
+                            case CommentAction.ActionTypes.UseSlide:
+                                _SlideBLO.UseSlide(commentAction);
                                 break;
                         }
                     }
@@ -258,8 +284,28 @@ namespace PowerPointLibrary.BLO
             // Add Slides
             foreach (var slide in _PresentationStructure.Slides)
             {
+
+                if(slide.UseSlideOrder != 0)
+                {
+                    // Use the slide from the file OutputfileName.slides.pptx
+
+                    if (!File.Exists(pplArguments.UseSlideOutPutFile))
+                    {
+                        throw new PplException($"The file '{pplArguments.UseSlideOutPutFile}' doesn't exist");
+                    }
+
+                    Presentation PresentationSource = _PresentationManager
+                        .OpenExistingPowerPointPresentation(_Application, pplArguments.UseSlideOutPutFile);
+
+                    _SlideManager.CopySlideFromOtherPresentation(PresentationSource, slide.UseSlideOrder, _Presentation, _Presentation.Slides.Count);
+
+                    continue;
+                }
+
                 SlideRange slideRange = _SlideManager
                     .CloneSlide(_Presentation, _Presentation.Slides[slide.TemplateSlide.Order], Locations.Location.Last);
+
+
 
                 Slide currentSlide = _Presentation.Slides[slideRange.SlideIndex];
 
@@ -288,8 +334,7 @@ namespace PowerPointLibrary.BLO
                     //   shape.Fill.UserPicture( Environment.CurrentDirectory +  "/images/informatique.jpg");
 
 
-           
-
+  
 
                     if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
                     {
@@ -338,7 +383,8 @@ namespace PowerPointLibrary.BLO
                             float left = (shapeWidth - scaledWidth) / 2 + shapeLeft;
                             float top = (shapeHeight - scaledHeight) / 2 + shapeTop;
 
-                            Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager.AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
+                            Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
+                                .AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
 
                            //  image_shape.AnimationSettings.AnimationOrder = 1;
                             image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;

@@ -18,5 +18,10 @@ namespace PowerPointLibrary.Entities
         public string TemplateConfigurationPath { get; set; }
         public string OutPutPath { get; set; }
         public string OutPutFile { get; set; }
+
+        /// <summary>
+        /// Presentation used to find a slides to copy in current presentation
+        /// </summary>
+        public string UseSlideOutPutFile { get; set; }
     }
 }

@@ -20,15 +20,22 @@ namespace PowerPointLibrary.Entities
             ChangeZone,
             NewSlide,
             Note,
-            EndNote
+            EndNote,
+            UseSlide
         }
 
         public string Comment { get; set; }
 
 
         public ActionTypes ActionType { get; set; }
-        public string Layout { get; internal set; }
-        public string ZoneName { get; internal set; }
+        public string Layout { get; set; }
+        public string ZoneName { get; set; }
+
+
+        /// <summary>
+        /// Slide order in OutputfileName.slides
+        /// </summary>
+        public int UseSlideOrder { get; set; }
 
         public CommentAction(string Comment)
         {

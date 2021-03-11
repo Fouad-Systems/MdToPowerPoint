@@ -32,6 +32,7 @@ namespace PowerPointLibrary.BLO
                     {
                         pplArguments.MdDocumentPath = args[i];
                         pplArguments.OutPutFile = Path.GetFileNameWithoutExtension(pplArguments.MdDocumentPath) + ".pptx";
+                        pplArguments.UseSlideOutPutFile = Path.GetFileNameWithoutExtension(pplArguments.MdDocumentPath) + ".slides.pptx";
 
 
                     }
@@ -88,7 +89,7 @@ namespace PowerPointLibrary.BLO
 
             // OutPutFile
             pplArguments.OutPutFile = Path.Combine(pplArguments.OutPutPath, pplArguments.OutPutFile);
-            
+            pplArguments.UseSlideOutPutFile = Path.Combine(pplArguments.OutPutPath, pplArguments.UseSlideOutPutFile);
 
             return pplArguments;
         }

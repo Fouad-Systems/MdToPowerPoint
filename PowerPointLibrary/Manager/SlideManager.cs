@@ -95,6 +95,23 @@
             return dupeSlide;
         }
 
+        public PPT.SlideRange CopySlideFromOtherPresentation(
+               PPT.Presentation presentationSource,
+               int SlideOrderSource,
+               PPT.Presentation presentationDestination,
+               int SlideOrderDestination)
+        {
+            presentationSource.Slides[SlideOrderSource].Copy();
+
+           // presentationDestination.Slides.Add(SlideOrderDestination, PpSlideLayout.ppLayoutBlank);
+            presentationDestination.Slides.Paste(presentationDestination.Slides.Count + 1);
+            return null;
+        }
+
+
+
+
+
         /// <summary>
         ///     Returns the number of comments attached to a slide
         /// </summary>

@@ -30,6 +30,11 @@ namespace PowerPointLibrary.BLO
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Header:
 
                     HeaderBlock headerBlock = markdownBlock as HeaderBlock;
+
+                    this.TrimFirstInlines(headerBlock);
+
+
+
                     this.AddInLindesToSlideZone(SlideZone, headerBlock.Inlines);
 
                     break;
@@ -48,6 +53,25 @@ namespace PowerPointLibrary.BLO
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.YamlHeader:
                     break;
                 default:
+                    break;
+            }
+
+        }
+
+        private void TrimFirstInlines(HeaderBlock headerBlock)
+        {
+            var first = headerBlock.Inlines.First();
+
+            switch (first.Type)
+            {
+                case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.TextRun:
+                    (first as TextRunInline).Text = (first as TextRunInline).Text.Remove(0, 1);
+                    break;
+                case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Bold:
+                    ((first as BoldTextInline).Inlines[0] as TextRunInline).Text = ((first as BoldTextInline).Inlines[0] as TextRunInline).Text.Remove(0, 1);
+                    break;
+                case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Italic:
+                    ((first as ItalicTextInline).Inlines[0] as TextRunInline).Text = ((first as ItalicTextInline).Inlines[0] as TextRunInline).Text.Remove(0, 1);
                     break;
             }
 
@@ -88,7 +112,9 @@ namespace PowerPointLibrary.BLO
                         TextRunInline textRunInline = markdownInline as TextRunInline;
 
                         // in head , a space is auto-added, we must delete it
-                        string text = textRunInline.Text.Trim();
+                         string text = textRunInline.Text;
+
+                        if (SlideZone.Text == null) SlideZone.Text = new TextStructure();
                         SlideZone.Text.Text += text;
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Bold:
