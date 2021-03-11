@@ -17,12 +17,19 @@ automatique de l'information.
 
 ![Informatique](./images/informatique.jpg)
 
+![Informatique](./images/informatique.jpg)
+
 ## Listes
 
 les domaines d'application
 
+![Informatique](./images/informatique.jpg)
+
 1. Programmation
 2. Bureautique
+
+![Informatique](./images/informatique.jpg)
+
 
 l'informatique est un science qui permet de réaliser des outils de traitement automatique 
 de l'information. l'informatique est un science qui permet de réaliser des outils de traitement 

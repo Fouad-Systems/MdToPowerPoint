@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using PowerPointLibrary.Exceptions;
+using PowerPointLibrary.Entities;
 
 namespace MdToPowerPoint
 {
@@ -20,24 +21,27 @@ namespace MdToPowerPoint
     {
         static void Main(string[] args)
         {
-            string MdDocumentFileName = "mdData.md";
-            // new TemplateStructureBLO().CreateTemplateStructureExemple();
 
-            if (args != null && args.Length > 0)
-            {
-                MdDocumentFileName = args[0];
+            PplArguments pplArguments = new PplArgumentsBLO().Read(args);
 
-            }
+            //string MdDocumentFileName = "mdData.md";
+            //// new TemplateStructureBLO().CreateTemplateStructureExemple();
 
-            string FilePath = Environment.CurrentDirectory + "\\" + MdDocumentFileName;
-            if (!File.Exists(FilePath))
-            {
-                string msg = $"The file ({FilePath}) doesn't exist";
-                throw new PplException(msg);
-            }
+            //if (args != null && args.Length > 0)
+            //{
+            //    MdDocumentFileName = args[0];
+
+            //}
+
+            //string FilePath = Environment.CurrentDirectory + "\\" + MdDocumentFileName;
+            //if (!File.Exists(FilePath))
+            //{
+            //    string msg = $"The file ({FilePath}) doesn't exist";
+            //    throw new PplException(msg);
+            //}
 
 
-            CreatePresenytation(MdDocumentFileName);
+            CreatePresenytation(pplArguments);
 
             // Clean up the unmanaged PowerPoint COM resources by forcing a  
             // garbage collection as soon as the calling function is off the  
@@ -53,13 +57,12 @@ namespace MdToPowerPoint
 
         }
 
-        private static void CreatePresenytation(string MdDocumentFileName)
+        private static void CreatePresenytation(PplArguments pplArguments)
         {
 
 
             // Load MarkDown File
-            string BaseDir = Environment.CurrentDirectory;
-            StreamReader sr = new StreamReader(BaseDir + "\\" + MdDocumentFileName);
+            StreamReader sr = new StreamReader(pplArguments.MdDocumentPath);
             string md = sr.ReadToEnd();
 
 
@@ -69,8 +72,8 @@ namespace MdToPowerPoint
 
 
             // Create presentation
-            PresentationBLO presentationBLO = new PresentationBLO();
-            presentationBLO.Create("template");
+            PresentationBLO presentationBLO = new PresentationBLO(pplArguments);
+            presentationBLO.Create();
 
             // Create Presentation DataStructure 
             presentationBLO.CreatePresentationDataStructure(mdDocument);
@@ -83,7 +86,7 @@ namespace MdToPowerPoint
 
 
            // System.Diagnostics.Process.Start(Environment.CurrentDirectory);
-            System.Diagnostics.Process.Start(Environment.CurrentDirectory + "/" + "output.pptx");
+            System.Diagnostics.Process.Start(pplArguments.OutPutFile);
 
         }
 

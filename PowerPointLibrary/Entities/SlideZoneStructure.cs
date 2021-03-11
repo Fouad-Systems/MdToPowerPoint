@@ -25,8 +25,8 @@ namespace PowerPointLibrary.Entities
             if (Text != null)
                 clone.Text = Text.Clone() as TextStructure;
 
-            if (Image != null)
-                clone.Images = Images.
+            if (Images != null)
+                clone.Images = Images.Select(m => m.Clone() as ImageStructure).ToList();
             return clone;
 
         }

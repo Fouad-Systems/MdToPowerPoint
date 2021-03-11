@@ -42,15 +42,9 @@ namespace PowerPointLibrary.BLO
 
         public PresentationStructure LoadConfiguration(string templateName)
         {
-            string filePath = Environment.CurrentDirectory + "/" + templateName + ".json";
-            
-            if(!File.Exists(filePath))
-            {
-                string msg = $"The file {filePath} doesn't exist ";
-                throw new PowerPointLibrary.Exceptions.PplException(msg);
-            }
+           
 
-            string code = File.ReadAllText(filePath);
+            string code = File.ReadAllText(templateName);
 
             var obj = JsonConvert.DeserializeObject(code, typeof(PresentationStructure));
             PresentationStructure templateStructure = obj as PresentationStructure;

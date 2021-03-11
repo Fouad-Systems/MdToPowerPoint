@@ -121,11 +121,15 @@ namespace PowerPointLibrary.BLO
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Image:
                         Microsoft.Toolkit.Parsers.Markdown.Inlines.ImageInline imageInline = markdownInline as ImageInline;
-                        SlideZone.Image = new ImageStructure();
-                        SlideZone.Image.ImageHeight = imageInline.ImageHeight;
-                        SlideZone.Image.ImageWidth = imageInline.ImageWidth;
-                        SlideZone.Image.Url = imageInline.Url;
-                        SlideZone.Image.Tooltip = imageInline.Tooltip;
+                        if (SlideZone.Images == null) SlideZone.Images = new List<ImageStructure>();
+                        ImageStructure imageStructure = new ImageStructure();
+                        SlideZone.Images.Add(imageStructure);
+
+
+                        imageStructure.ImageHeight = imageInline.ImageHeight;
+                        imageStructure.ImageWidth = imageInline.ImageWidth;
+                        imageStructure.Url = imageInline.Url;
+                        imageStructure.Tooltip = imageInline.Tooltip;
                         //string text = textRunInline.Text;
                         //textStructure.Text += text;
                         break;

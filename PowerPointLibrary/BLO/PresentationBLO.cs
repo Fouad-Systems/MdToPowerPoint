@@ -42,8 +42,11 @@ namespace PowerPointLibrary.BLO
         private readonly SlideBLO _SlideBLO;
         private readonly SlideZoneStructureBLO _SlideZoneStructureBLO;
 
-        public PresentationBLO()
+        public PplArguments pplArguments;
+        public PresentationBLO(PplArguments pplArguments)
         {
+            this.pplArguments = pplArguments;
+
             // Init Manager
             _ApplicationManager = new PowerPointApplicationManager();
             _PresentationManager = new PresentationManager();
@@ -68,28 +71,28 @@ namespace PowerPointLibrary.BLO
         /// Create a new Presentation from template
         /// </summary>
         /// <param name="TemplateName"></param>
-        public void Create(string TemplateName)
+        public void Create()
         {
-            string CurrentDirectory = Environment.CurrentDirectory;
-            string PowerPointTemplateFileName = CurrentDirectory + "/" + TemplateName + ".pptx";
-            if (!File.Exists(PowerPointTemplateFileName))
-            {
-                PowerPointTemplateFileName = CurrentDirectory + "/" + TemplateName + ".potx";
+            //string CurrentDirectory = Environment.CurrentDirectory;
+            //string PowerPointTemplateFileName = CurrentDirectory + "/" + TemplateName + ".pptx";
+            //if (!File.Exists(PowerPointTemplateFileName))
+            //{
+            //    PowerPointTemplateFileName = CurrentDirectory + "/" + TemplateName + ".potx";
 
-                if (!File.Exists(PowerPointTemplateFileName))
-                {
-                    string msg = $"The file { PowerPointTemplateFileName} or {TemplateName + ".potx"} not exist";
-                    throw new PowerPointLibrary.Exceptions.PplException(msg);
-                }
-            }
+            //    if (!File.Exists(PowerPointTemplateFileName))
+            //    {
+            //        string msg = $"The file { PowerPointTemplateFileName} or {TemplateName + ".potx"} not exist";
+            //        throw new PowerPointLibrary.Exceptions.PplException(msg);
+            //    }
+            //}
 
             // Open an existing PowerPoint presentation
             _Presentation = _PresentationManager.OpenExistingPowerPointPresentation(
                     _Application,
-                    PowerPointTemplateFileName);
+                    this.pplArguments.TemplatePath);
 
 
-            this._TemplateStructure = _TemplateStructureBLO.LoadConfiguration(TemplateName);
+            this._TemplateStructure = _TemplateStructureBLO.LoadConfiguration(this.pplArguments.TemplateConfigurationPath);
 
         }
 
@@ -210,8 +213,10 @@ namespace PowerPointLibrary.BLO
                             if (this.CurrentSlide.AddToNotes)
                             {
 
-                                //if (this.CurrentSlide.CurrentZone.Text == null) this.CurrentSlide.CurrentZone.Text = new TextStructure();
-                                //_TextStructureBLO.CreateAndAddFromMarkdownBlock(this.CurrentSlide.CurrentZone.Text, Paragraph);
+                                if (this.CurrentSlide.Notes == null) this.CurrentSlide.Notes = new SlideZoneStructure();
+                                if (this.CurrentSlide.Notes.Text == null) this.CurrentSlide.Notes.Text = new TextStructure();
+
+                                _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.Notes, Paragraph);
 
                             }
                         }
@@ -236,7 +241,13 @@ namespace PowerPointLibrary.BLO
                     .CloneSlide(_Presentation, _Presentation.Slides[slide.TemplateSlide.Order], Locations.Location.Last);
 
                 Slide currentSlide = _Presentation.Slides[slideRange.SlideIndex];
-                // Add Note content
+
+
+                //currentSlide.NotesPage.Shapes.Placeholders[2].TextFrame.TextRange.InsertAfter("This is a Test");
+                //var ttt = currentSlide.NotesPage.Shapes.Placeholders[2].TextFrame.TextRange;
+
+                if (slide.Notes != null && slide.Notes.Text != null)
+                    _TextRangeManager.AddTextStructure(currentSlide.NotesPage.Shapes.Placeholders[2].TextFrame.TextRange, slide.Notes.Text);
                 // slideRange.NotesPage
 
 
@@ -249,41 +260,54 @@ namespace PowerPointLibrary.BLO
                         Microsoft.Office.Interop.PowerPoint.Shape shape = slideRange.Shapes[SlideZone.Name];
                         //   shape.Fill.UserPicture( Environment.CurrentDirectory +  "/images/informatique.jpg");
 
+                       
+                        float shapeWidth = shape.Width;
+                        float shapeHeight = shape.Height;
+                        float shapeLeft = shape.Left;
+                        float shapeTop = shape.Top;
                         if (SlideZone.Text != null)
                         {
                             _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
                         }
 
-                        if (SlideZone.Image != null)
+                        if (SlideZone.Images != null && SlideZone.Images.Count > 0)
                         {
 
-                            float imageHeight = 0;
-                            float imageWidth = 0;
-                            string file = Environment.CurrentDirectory + SlideZone.Image.Url;
-                            using (var img = Image.FromFile(file))
+                            foreach (var image in SlideZone.Images)
                             {
-                                imageHeight = img.Height;
-                                imageWidth = img.Width;
+
+                                float imageHeight = 0;
+                                float imageWidth = 0;
+                                string file = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
+                                using (var img = Image.FromFile(file))
+                                {
+                                    imageHeight = img.Height;
+                                    imageWidth = img.Width;
+                                }
+
+                                float scale = Math.Min(shapeWidth / imageWidth, shapeHeight / imageHeight);
+
+                                float scaledWidth = imageWidth * scale;
+                                float scaledHeight = imageHeight * scale;
+
+
+                                float left = (shapeWidth - scaledWidth) / 2 + shapeLeft;
+                                float top = (shapeHeight - scaledHeight) / 2 + shapeTop;
+
+                                // _ShapeManager.AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
+                                file = @"E:\formations\formation-git-github\src\images\10.jpg";
+                                _ShapeManager.AddPicture(currentSlide, file, 10f,10f, 100f, 100f);
                             }
 
-                            float scale = Math.Min(shape.Width / imageWidth, shape.Height / imageHeight);
 
-                            float scaledWidth = imageWidth * scale;
-                            float scaledHeight = imageHeight * scale;
-
-
-                            float left = (shape.Width - scaledWidth) / 2 + shape.Left;
-                            float top = (shape.Height - scaledHeight) / 2 + shape.Top;
-
-                            _ShapeManager.AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
 
 
                             // _ShapeManager.AddPicture(currentSlide, file, shape.Left, shape.Top, imageWidth, imageHeight); ;
                         }
 
-                      
-                       
-                        
+
+
+
 
                     }
                 }
@@ -300,7 +324,7 @@ namespace PowerPointLibrary.BLO
 
 
 
-            this.SaveAs(Environment.CurrentDirectory + "/" + "output.pptx");
+            this.SaveAs(this.pplArguments.OutPutFile);
             this.Close();
 
         }
