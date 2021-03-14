@@ -11,6 +11,9 @@ namespace PowerPointLibrary.Entities
 
     public class PresentationStructure
     {
+
+        public PresentationStructure _TemplateStructure { get; set; }
+
         public List<SlideStructure> Slides { set; get; }
 
 

@@ -14,11 +14,13 @@ namespace PowerPointLibrary.BLO
         public static string ZoneTitleName = "Titre";
         PresentationBLO _PresentationBLO;
         SlideZoneStructureBLO _SlideZoneStructureBLO;
+        TemplateStructureBLO _TemplateStructureBLO;
 
         public SlideBLO(PresentationBLO _PresentationBLO)
         {
             this._PresentationBLO = _PresentationBLO;
             _SlideZoneStructureBLO = new SlideZoneStructureBLO();
+            _TemplateStructureBLO = new TemplateStructureBLO(_PresentationBLO._PresentationStructure);
         }
 
         public SlideStructure CurrentSlide
@@ -36,14 +38,7 @@ namespace PowerPointLibrary.BLO
             var oldSlideZones = slideStructure
                 .SlideZones.Select(z => z.Clone() as SlideZoneStructure).ToList();
 
-            var TemplateSlide = _PresentationBLO._TemplateStructure
-                .Slides.Where(s => s.Layout == layout).FirstOrDefault();
-
-            if (TemplateSlide == null)
-            {
-                string msg = $"The layout {layout} doesn't exist";
-                throw new PplException(msg);
-            }
+            var TemplateSlide = _TemplateStructureBLO.GetSlide(layout);
 
             slideStructure.SlideZones = TemplateSlide.SlideZones.Select(s => s.Clone() as SlideZoneStructure).ToList();
             slideStructure.TemplateSlide = TemplateSlide;
@@ -83,14 +78,7 @@ namespace PowerPointLibrary.BLO
         public void AddSlide(string Layout)
         {
             // Add Template Zone to Slide
-            var TemplateSlide = _PresentationBLO._TemplateStructure.Slides
-                 .Where(s => s.Layout == Layout).FirstOrDefault();
-
-            if (TemplateSlide == null)
-            {
-                string msg = $"The layout {Layout} doesn't exist";
-                throw new PowerPointLibrary.Exceptions.PplException(msg);
-            }
+            var TemplateSlide = _TemplateStructureBLO.GetSlide(Layout);
 
             SlideStructure slideStructure = new SlideStructure();
             _PresentationBLO._PresentationStructure.Slides.Add(slideStructure);
@@ -120,17 +108,37 @@ namespace PowerPointLibrary.BLO
         {
             // Change if we are in zone title or image zone
 
-            if (this.CurrentSlide.CurrentZone == null ||
-                !this.CurrentSlide.CurrentZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
+            if (this.CurrentSlide.IsGenerated == false)
             {
+                if (this.CurrentSlide.CurrentZone == null || !this.CurrentSlide.CurrentZone.IsImage())
+                {
 
-                int CurrentZoneOrder = 0;
-                if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+                    int CurrentZoneOrder = this.CurrentSlide.SlideZones.Where(z => !z.IsEmpty()).Count();
 
-                this.CurrentSlide.CurrentZone = this.CurrentSlide
-              .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
-              .FirstOrDefault();
+                    if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+
+                    this.CurrentSlide.CurrentZone = this.CurrentSlide
+                  .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
+                  .FirstOrDefault();
+                }
             }
+            else
+            {
+                // Change if we are in zone title or image zone
+                if (this.CurrentSlide.CurrentZone == null || !this.CurrentSlide.CurrentZone.IsImage())
+                {
+                    int CurrentZoneOrder = this.CurrentSlide.GeneratedSlideZones.Where(z => !z.IsEmpty()).Count();
+                    if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+
+                    this.CurrentSlide.CurrentZone = this.CurrentSlide
+                  .GeneratedSlideZones
+
+                  .Where(s => s.Order > CurrentZoneOrder)
+                  .Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Text))
+                  .FirstOrDefault();
+                }
+            }
+              
 
 
 
@@ -138,14 +146,34 @@ namespace PowerPointLibrary.BLO
 
         public void WriteToImageZone()
         {
+          
 
 
-            int CurrentZoneOrder = 0;
-            if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+            if (this.CurrentSlide.IsGenerated == false)
+            {
+                int CurrentZoneOrder = this.CurrentSlide.SlideZones.Where(z => !z.IsEmpty()).Count();
+                if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
 
-            this.CurrentSlide.CurrentZone = this.CurrentSlide
-         .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image))
-         .FirstOrDefault();
+
+                this.CurrentSlide.CurrentZone = this.CurrentSlide
+             .SlideZones.Where(s => s.Order > CurrentZoneOrder)
+             .Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image))
+             .FirstOrDefault();
+            }
+            else
+            {
+                int CurrentZoneOrder = this.CurrentSlide.GeneratedSlideZones.Where(z => !z.IsEmpty()).Count();
+                if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
+
+
+                this.CurrentSlide.CurrentZone = this.CurrentSlide
+            .GeneratedSlideZones.Where(s => s.Order > CurrentZoneOrder)
+            .Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image))
+            .FirstOrDefault();
+
+            }
+
+
 
             //// Change layout to another layout that have a free space for the new image
             //if (this.CurrentSlide.CurrentZone == null && !this.CurrentSlide.IsLayoutChangedByAction)
@@ -155,7 +183,7 @@ namespace PowerPointLibrary.BLO
             //        .Slides
             //        .Where(s => s.SlideZones
             //           .Where(z => 
-                       
+
             //              z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image) 
             //             ||
 
@@ -177,7 +205,7 @@ namespace PowerPointLibrary.BLO
             // .SlideZones.Where(s => s.Order > CurrentZoneOrder).Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Image))
             // .FirstOrDefault();
             //    }
-                  
+
             //}
 
         }
@@ -205,5 +233,25 @@ namespace PowerPointLibrary.BLO
             _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.Notes, paragraph);
             this.CurrentSlide.Notes.Text.Text += "\r";
         }
+
+
+
+     
+
+        //public void CopySlideZoneToGeneratedSlideZone()
+        //{
+        //    // Add the created Zone to GeneratedSlideZones
+        //    foreach (var item in this.CurrentSlide.SlideZones)
+        //    {
+        //        if(item.Text != null && !string.IsNullOrEmpty(item.Text.Text))
+        //        {
+
+        //        }
+        //        if (_SlideZoneStructureBLO.IsHaveData(item))
+        //        {
+        //            this.CurrentSlide.GeneratedSlideZones.Add(item.Clone() as SlideZoneStructure);
+        //        }
+        //    }
+        //}
     }
 }

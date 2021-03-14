@@ -21,14 +21,20 @@ namespace PowerPointLibrary.Entities
             NewSlide,
             Note,
             EndNote,
-            UseSlide
+            UseSlide,
+            GenerateLayout
         }
 
         public string Comment { get; set; }
 
 
         public ActionTypes ActionType { get; set; }
+
+        /// <summary>
+        /// Used to change layout
+        /// </summary>
         public string Layout { get; set; }
+
         public string ZoneName { get; set; }
 
 
@@ -37,7 +43,12 @@ namespace PowerPointLibrary.Entities
         /// </summary>
         public int UseSlideOrder { get; set; }
 
-        public CommentAction(string Comment)
+
+        public GLayoutStructure GLayoutStructure  { get; set; }
+
+
+
+    public CommentAction(string Comment)
         {
             this.Comment = Comment;
 

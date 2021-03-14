@@ -26,7 +26,7 @@ namespace PowerPointLibrary.BLO
         #region Attributes
         internal Application _Application;
         internal Presentation _Presentation;
-        internal PresentationStructure _TemplateStructure;
+        // internal PresentationStructure _TemplateStructure;
         internal PresentationStructure _PresentationStructure;
 
         private readonly PowerPointApplicationManager _ApplicationManager;
@@ -35,11 +35,13 @@ namespace PowerPointLibrary.BLO
         private readonly ShapesManager _ShapeManager;
         private readonly TextRangeManager _TextRangeManager;
 
-        private readonly PresentationStructureBLO _TemplateStructureBLO;
+        private readonly PresentationStructureBLO _PresentationStructureBLO;
+        private TemplateStructureBLO _TemplateStructureBLO;
         private readonly TextStructureBLO _TextStructureBLO;
         private readonly CommentActionBLO _CommentActionBLO;
         private readonly SlideBLO _SlideBLO;
         private readonly SlideZoneStructureBLO _SlideZoneStructureBLO;
+        private GLayoutStructureBLO _GLayoutStructureBLO;
 
         public PplArguments pplArguments;
         #endregion
@@ -56,18 +58,23 @@ namespace PowerPointLibrary.BLO
             _ShapeManager = new ShapesManager();
 
 
-            // Init BLO
-            _TemplateStructureBLO = new PresentationStructureBLO();
-            _TextStructureBLO = new TextStructureBLO();
-            _CommentActionBLO = new CommentActionBLO();
-            _SlideBLO = new SlideBLO(this);
-            _SlideZoneStructureBLO = new SlideZoneStructureBLO();
 
 
             _Application = _ApplicationManager.CreatePowerPointApplication();
             _PresentationStructure = new PresentationStructure();
+            _GLayoutStructureBLO = new GLayoutStructureBLO();
+
+            // Init BLO
+            _PresentationStructureBLO = new PresentationStructureBLO(this._PresentationStructure);
+            _TextStructureBLO = new TextStructureBLO();
+            _CommentActionBLO = new CommentActionBLO();
+            _SlideBLO = new SlideBLO(this);
+            _SlideZoneStructureBLO = new SlideZoneStructureBLO();
+            _TemplateStructureBLO = new TemplateStructureBLO(_PresentationStructure);
         }
 
+
+        #region Create,Save,Close
         /// <summary>
         /// Create a new Presentation from template
         /// </summary>
@@ -93,7 +100,7 @@ namespace PowerPointLibrary.BLO
                     this.pplArguments.TemplatePath);
 
 
-            this._TemplateStructure = _TemplateStructureBLO.LoadConfiguration(this.pplArguments.TemplateConfigurationPath);
+            this._PresentationStructure._TemplateStructure = _PresentationStructureBLO.LoadConfiguration(this.pplArguments.TemplateConfigurationPath);
 
         }
 
@@ -112,6 +119,8 @@ namespace PowerPointLibrary.BLO
             this._Presentation.Close();
             this._Application.Quit();
         }
+
+        #endregion
 
 
         public void CreatePresentationDataStructure(MarkdownDocument mdDocument)
@@ -134,8 +143,8 @@ namespace PowerPointLibrary.BLO
                     if (header.HeaderLevel <= 2)
                     {
                         string layout = "";
-                        if (header.HeaderLevel == 1) layout = "Titre partie";
-                        if (header.HeaderLevel >= 2) layout = "Titre et contenu";
+                        if (header.HeaderLevel == 1) layout = "Titre session";
+                        if (header.HeaderLevel >= 2) layout = "Titre contenu";
 
                         _SlideBLO.AddSlide(layout);
                         _SlideBLO.WriteToTitleZone();
@@ -152,10 +161,11 @@ namespace PowerPointLibrary.BLO
                     {
                         _SlideBLO.WriteToTextZone();
                         SlideZoneStructure zoneTitle = this.CurrentSlide.CurrentZone;
-                        _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(zoneTitle, header);
+                        if (zoneTitle != null)
+                            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(zoneTitle, header);
                     }
 
-                   
+
                 }
 
 
@@ -180,7 +190,7 @@ namespace PowerPointLibrary.BLO
                         _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, List);
                         this.CurrentSlide.CurrentZone.Text.Text += "\r";
                     }
-                    
+
                 }
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.QuoteBlock Quote)
@@ -192,10 +202,10 @@ namespace PowerPointLibrary.BLO
 
                 }
 
-               
+
                 if (element is ParagraphBlock Paragraph)
                 {
-  
+
                     // if paragraphe is action
                     if (Paragraph.Inlines[0].Type == MarkdownInlineType.Comment
                         && _CommentActionBLO.IsAction(Paragraph.Inlines[0].ToString()))
@@ -232,6 +242,9 @@ namespace PowerPointLibrary.BLO
                             case CommentAction.ActionTypes.UseSlide:
                                 _SlideBLO.UseSlide(commentAction);
                                 break;
+                            case CommentAction.ActionTypes.GenerateLayout:
+                                _GLayoutStructureBLO.GenerateSlideZone(this.CurrentSlide, commentAction.GLayoutStructure);
+                                break;
                         }
                     }
                     else
@@ -242,7 +255,7 @@ namespace PowerPointLibrary.BLO
 
                             _SlideBLO.AddNotes(Paragraph);
 
-                          
+
 
                         }
                         else
@@ -274,8 +287,8 @@ namespace PowerPointLibrary.BLO
                         }
 
 
-                      
-                       
+
+
 
                     }
 
@@ -292,7 +305,7 @@ namespace PowerPointLibrary.BLO
             foreach (var slide in _PresentationStructure.Slides)
             {
 
-                if(slide.UseSlideOrder != 0)
+                if (slide.UseSlideOrder != 0)
                 {
                     // Use the slide from the file OutputfileName.slides.pptx
 
@@ -309,12 +322,26 @@ namespace PowerPointLibrary.BLO
                     continue;
                 }
 
-                SlideRange slideRange = _SlideManager
-                    .CloneSlide(_Presentation, _Presentation.Slides[slide.TemplateSlide.Order], Locations.Location.Last);
+
+                // Clone Slide
+                Slide currentSlide = null;
+                SlideRange slideRange = null;
+                if (slide.IsGenerated)
+                {
+                    int TitreContenuSldeOrder = _TemplateStructureBLO.GetSlide("Titre contenu").Order;
+                    slideRange = _SlideManager
+                   .CloneSlide(_Presentation, _Presentation.Slides[TitreContenuSldeOrder], Locations.Location.Last);
+                    currentSlide = _Presentation.Slides[slideRange.SlideIndex];
+                }
+                else
+                {
+                    slideRange = _SlideManager
+                   .CloneSlide(_Presentation, _Presentation.Slides[slide.TemplateSlide.Order], Locations.Location.Last);
+
+                    currentSlide = _Presentation.Slides[slideRange.SlideIndex];
+                }
 
 
-
-                Slide currentSlide = _Presentation.Slides[slideRange.SlideIndex];
 
 
                 //currentSlide.NotesPage.Shapes.Placeholders[2].TextFrame.TextRange.InsertAfter("This is a Test");
@@ -324,93 +351,204 @@ namespace PowerPointLibrary.BLO
                     _TextRangeManager.AddTextStructure(currentSlide.NotesPage.Shapes.Placeholders[2].TextFrame.TextRange, slide.Notes.Text);
                 // slideRange.NotesPage
 
-               
-
-                foreach (var SlideZone in slide.SlideZones)
+                if (slide.IsGenerated)
                 {
 
+           
+                    float resolution_with = currentSlide.Master.Width;
+                    float resolution_Height = currentSlide.Master.Height;
+                    float ratio = resolution_with / 1920;
+                    ratio = resolution_Height / 1080;
 
-                    //List<string> zones = new List<string>();
-                    //foreach (Microsoft.Office.Interop.PowerPoint.Shape item in slideRange.Shapes)
-                    //{
-                    //    zones.Add(item.Name);
-                    //}
+                    Microsoft.Office.Interop.PowerPoint.Shape contenu_shape = currentSlide.Shapes["contenu"];
 
-
-                    Microsoft.Office.Interop.PowerPoint.Shape shape = slideRange.Shapes[SlideZone.Name];
-                    //   shape.Fill.UserPicture( Environment.CurrentDirectory +  "/images/informatique.jpg");
-
-
-  
-
-                    if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
+                    foreach (var SlideZone in slide.GeneratedSlideZones)
                     {
 
-                        _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
-
-                        if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                      
+                        if(SlideZone.Name == "Title" || SlideZone.Name =="Titre")
                         {
-                            shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
-                        }
-                       
-                    }
+                            Microsoft.Office.Interop.PowerPoint.Shape titleShape = slideRange.Shapes[SlideZone.Name];
+                         
 
-                    if (SlideZone.Images != null && SlideZone.Images.Count > 0)
-                    {
-                        float shapeWidth = shape.Width;
-                        float shapeHeight = shape.Height;
-                        float shapeLeft = shape.Left;
-                        float shapeTop = shape.Top;
-
-                        // il faut supprimer "shape" si non AddPicture va remplater le shpae par image 
-                        // sans prendre en considération with et height
-
-                        // shape.Delete(); if yout delet a shape PowerPoit will rename the other shape
-                        // add empty string for AddPicture to Word Correctly with with et and height
-                        // shape.TextFrame.TextRange.Text = "aaaaaaaa a ";
-
-                        foreach (var image in SlideZone.Images)
-                        {
-
-                            float imageHeight = 0;
-                            float imageWidth = 0;
-                            string file = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
-                            using (var img = Image.FromFile(file))
+                            if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
                             {
-                                imageHeight = img.Height;
-                                imageWidth = img.Width;
+
+                                _TextRangeManager.AddTextStructure(titleShape.TextFrame.TextRange, SlideZone.Text);
+
                             }
 
-                            float scale = Math.Min(shapeWidth / imageWidth, shapeHeight / imageHeight);
+                            continue;
+                        }
+                       
 
-                            float scaledWidth = imageWidth * scale;
-                            float scaledHeight = imageHeight * scale;
+                        
 
+                        if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
+                        {
+                            var shape = contenu_shape.Duplicate()[1];
 
-                            float left = (shapeWidth - scaledWidth) / 2 + shapeLeft;
-                            float top = (shapeHeight - scaledHeight) / 2 + shapeTop;
+                            shape.Width = SlideZone.Width * ratio;
+                            shape.Height = SlideZone.Height * ratio;
+                            shape.Top = SlideZone.Top * ratio;
+                            shape.Left = SlideZone.Left * ratio;
 
-                            Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
-                                .AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
+                            _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
 
-                           //  image_shape.AnimationSettings.AnimationOrder = 1;
-                            image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
-                            //file = @"E:\formations\formation-git-github\src\images\10.jpg";
-                            // _ShapeManager.AddPicture(currentSlide, file, 10f,10f, 100f, 100f);
+                            if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                            {
+                                shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                            }
+
                         }
 
+                        if (SlideZone.Images != null && SlideZone.Images.Count > 0)
+                        {
+
+                            var shape = contenu_shape.Duplicate()[1];
+
+                            shape.Width = SlideZone.Width * ratio;
+                            shape.Height = SlideZone.Height * ratio;
+                            shape.Top = SlideZone.Top * ratio;
+                            shape.Left = SlideZone.Left * ratio;
+
+                           
+
+                            float shapeWidth = SlideZone.Width * ratio;
+                            float shapeHeight = SlideZone.Height * ratio;
+                            float shapeLeft = SlideZone.Left * ratio;
+                            float shapeTop = SlideZone.Top * ratio;
+
+                            // il faut supprimer "shape" si non AddPicture va remplater le shpae par image 
+                            // sans prendre en considération with et height
+
+                            // shape.Delete(); if yout delet a shape PowerPoit will rename the other shape
+                            // add empty string for AddPicture to Word Correctly with with et and height
+                            // shape.TextFrame.TextRange.Text = "aaaaaaaa a ";
+
+                            foreach (var image in SlideZone.Images)
+                            {
+
+                                float imageHeight = 0;
+                                float imageWidth = 0;
+                                string file = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
+                                using (var img = Image.FromFile(file))
+                                {
+                                    imageHeight = img.Height;
+                                    imageWidth = img.Width;
+                                }
+
+                                float scale = Math.Min(shapeWidth / imageWidth, shapeHeight / imageHeight);
+
+                                float scaledWidth = imageWidth * scale;
+                                float scaledHeight = imageHeight * scale;
 
 
+                                float left = (shapeWidth - scaledWidth) / 2 + shapeLeft;
+                                float top = (shapeHeight - scaledHeight) / 2 + shapeTop;
 
-                        // _ShapeManager.AddPicture(currentSlide, file, shape.Left, shape.Top, imageWidth, imageHeight); ;
+                                Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
+                                    .AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
+
+                                //  image_shape.AnimationSettings.AnimationOrder = 1;
+                                image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                                //file = @"E:\formations\formation-git-github\src\images\10.jpg";
+                                // _ShapeManager.AddPicture(currentSlide, file, 10f,10f, 100f, 100f);
+                            }
+
+
+                            // _ShapeManager.AddPicture(currentSlide, file, shape.Left, shape.Top, imageWidth, imageHeight); ;
+                        }
+
+                      
                     }
+
+                    contenu_shape.Delete();
                 }
+                else
+                {
+                    foreach (var SlideZone in slide.SlideZones)
+                    {
+
+
+                        //List<string> zones = new List<string>();
+                        //foreach (Microsoft.Office.Interop.PowerPoint.Shape item in slideRange.Shapes)
+                        //{
+                        //    zones.Add(item.Name);
+                        //}
+
+                        Microsoft.Office.Interop.PowerPoint.Shape shape = slideRange.Shapes[SlideZone.Name];
+                        //   shape.Fill.UserPicture( Environment.CurrentDirectory +  "/images/informatique.jpg");
+
+                        if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
+                        {
+
+                            _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
+
+                            if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                            {
+                                shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                            }
+
+                        }
+
+                        if (SlideZone.Images != null && SlideZone.Images.Count > 0)
+                        {
+                            float shapeWidth = shape.Width;
+                            float shapeHeight = shape.Height;
+                            float shapeLeft = shape.Left;
+                            float shapeTop = shape.Top;
+
+                            // il faut supprimer "shape" si non AddPicture va remplater le shpae par image 
+                            // sans prendre en considération with et height
+
+                            // shape.Delete(); if yout delet a shape PowerPoit will rename the other shape
+                            // add empty string for AddPicture to Word Correctly with with et and height
+                            // shape.TextFrame.TextRange.Text = "aaaaaaaa a ";
+
+                            foreach (var image in SlideZone.Images)
+                            {
+
+                                float imageHeight = 0;
+                                float imageWidth = 0;
+                                string file = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
+                                using (var img = Image.FromFile(file))
+                                {
+                                    imageHeight = img.Height;
+                                    imageWidth = img.Width;
+                                }
+
+                                float scale = Math.Min(shapeWidth / imageWidth, shapeHeight / imageHeight);
+
+                                float scaledWidth = imageWidth * scale;
+                                float scaledHeight = imageHeight * scale;
+
+
+                                float left = (shapeWidth - scaledWidth) / 2 + shapeLeft;
+                                float top = (shapeHeight - scaledHeight) / 2 + shapeTop;
+
+                                Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
+                                    .AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
+
+                                //  image_shape.AnimationSettings.AnimationOrder = 1;
+                                image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                                //file = @"E:\formations\formation-git-github\src\images\10.jpg";
+                                // _ShapeManager.AddPicture(currentSlide, file, 10f,10f, 100f, 100f);
+                            }
+
+
+                            // _ShapeManager.AddPicture(currentSlide, file, shape.Left, shape.Top, imageWidth, imageHeight); ;
+                        }
+                    }
+
+                }
+
 
 
             }
 
             // Delete Template Slide
-            foreach (SlideStructure slide in _TemplateStructure.Slides)
+            foreach (SlideStructure slide in this._PresentationStructure._TemplateStructure.Slides)
             {
                 _SlideManager.DeleteSlide(_Presentation.Slides[1]);
             }

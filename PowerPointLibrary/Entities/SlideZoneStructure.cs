@@ -18,6 +18,17 @@ namespace PowerPointLibrary.Entities
 
         public int Order { set; get; }
 
+
+        /// <summary>
+        /// Line number in generated layout
+        /// </summary>
+        //public int GLines { get; set; }
+
+        /// <summary>
+        /// Columns number in generated layout
+        /// </summary>
+        //public int GColumns { get; set; }
+
         public List<ContentTypes> ContentTypes { get; set; }
 
 
@@ -25,6 +36,18 @@ namespace PowerPointLibrary.Entities
 
         public List<ImageStructure> Images { get; set; }
 
+
+        // Postion in layout
+        public int Width { get; internal set; }
+
+        // Postion in layout
+        public int Height { get; internal set; }
+
+        // Postion in layout
+        public int Top { get; internal set; }
+
+        // Postion in layout
+        public int Left { get; internal set; }
 
         public SlideZoneStructure()
         {
@@ -38,6 +61,12 @@ namespace PowerPointLibrary.Entities
             SlideZoneStructure clone = new SlideZoneStructure();
             clone.Name = Name;
             clone.Order = Order;
+            clone.Width = Width;
+            clone.Height = Height;
+            clone.Left = Left;
+            clone.Top = Top;
+
+
             if (Text != null)
                 clone.Text = Text.Clone() as TextStructure;
 
@@ -48,6 +77,25 @@ namespace PowerPointLibrary.Entities
 
             return clone;
 
+        }
+
+        public bool IsEmpty()
+        {
+            if (
+                ( this.Text != null && !string.IsNullOrEmpty(this.Text.Text))
+                 || (this.Images != null && this.Images.Count() >= 1 )
+               )
+                return false;
+
+            return true;
+        }
+
+        public bool IsImage()
+        {
+            if (this.Images != null && this.Images.Count() > 1)
+                return true;
+            else
+                return false;
         }
 
         // public ImageStructure { get; set; }

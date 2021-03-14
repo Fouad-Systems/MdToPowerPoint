@@ -16,7 +16,6 @@ namespace PowerPointLibrary.Entities
     public class SlideStructure
     {
 
-
         public string Name { get; set; }
 
         public string Layout { get; set; }
@@ -26,10 +25,14 @@ namespace PowerPointLibrary.Entities
         /// </summary>
         public bool IsLayoutChangedByAction { get; internal set; }
 
+        public bool IsGenerated { get; set; }
 
         public int Order { get; set; }
         public List<SlideZoneStructure> SlideZones { get; set; }
-      
+
+        public List<SlideZoneStructure> GeneratedSlideZones { get; set; }
+
+
         public SlideStructure TemplateSlide { set; get; }
 
         /// <summary>

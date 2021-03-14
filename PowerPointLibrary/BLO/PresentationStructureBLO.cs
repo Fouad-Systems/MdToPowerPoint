@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PowerPointLibrary.Entities;
+using PowerPointLibrary.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +15,13 @@ namespace PowerPointLibrary.BLO
 
     public class PresentationStructureBLO
     {
+        PresentationStructure _PresentationStructure;
+
+        public PresentationStructureBLO(PresentationStructure presentationStructure)
+        {
+            _PresentationStructure = presentationStructure;
+        }
+
         public static void CreateTemplateStructureExemple()
         {
 
@@ -66,5 +74,9 @@ namespace PowerPointLibrary.BLO
 
             return templateStructure;
         }
+
+       
+
+      
     }
 }
