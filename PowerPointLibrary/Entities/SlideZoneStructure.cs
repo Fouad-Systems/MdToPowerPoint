@@ -48,6 +48,7 @@ namespace PowerPointLibrary.Entities
 
         // Postion in layout
         public int Left { get; internal set; }
+        public int Row { get; internal set; }
 
         public SlideZoneStructure()
         {

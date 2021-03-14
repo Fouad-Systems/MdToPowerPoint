@@ -119,6 +119,7 @@ namespace PowerPointLibrary.BLO
                 TitleslideZoneStructure.Left = 0;
                 TitleslideZoneStructure.Width = 160 * 12;
                 TitleslideZoneStructure.Height = 90 * 2;
+                TitleslideZoneStructure.Row = 1;
 
                 currentTop += TitleslideZoneStructure.Height;
 
@@ -126,6 +127,8 @@ namespace PowerPointLibrary.BLO
             }
 
             int order = 1;
+            int padding = 30;
+            int RowNumber = 2;
 
             foreach (var row in gLayoutStructure.Rows)
             {
@@ -140,21 +143,54 @@ namespace PowerPointLibrary.BLO
 
                     slideZoneStructure.GColumns = bloc.Columns;
                     slideZoneStructure.GLines = bloc.Lines;
-                    slideZoneStructure.Width = bloc.Columns * 160;
-                    slideZoneStructure.Height = bloc.Lines * 90;
-                    slideZoneStructure.Top = currentTop;
-                    slideZoneStructure.Left = currentLeft;
-
-                    currentLeft += slideZoneStructure.Width;
+                    slideZoneStructure.Width = bloc.Columns * 160 - padding * 2;
+                    slideZoneStructure.Height = bloc.Lines * 90 - padding * 2;
+                    slideZoneStructure.Top = currentTop + padding;
+                    slideZoneStructure.Left = currentLeft + padding;
+                    slideZoneStructure.Row = RowNumber;
+                    currentLeft += slideZoneStructure.Width + padding * 2;
 
                     CurrentSlide.GeneratedSlideZones.Add(slideZoneStructure);
                 }
 
+                RowNumber++;
                 int row_Height = row.Blocs.Max(b => b.Lines) * 90;
                 currentTop += row_Height;
                 currentLeft = 0;
 
+
+             
+
+               
+
+
+
+
             }
+
+
+            int rowNumber = 1;
+            foreach (var row in gLayoutStructure.Rows)
+            {
+                var zones = CurrentSlide.GeneratedSlideZones.Where(z => z.Row == rowNumber).ToList();
+                rowNumber++;
+                if (zones.Count() == 1) continue;
+
+                int max_height = zones.Max(z => z.Height);
+
+                foreach (var zone in zones)
+                {
+                    zone.Top += (max_height - zone.Height) / 2;
+                }
+
+
+               
+            }
+
+             
+          
+
+
 
 
             // this.CopySlideZoneToGeneratedSlideZone();
