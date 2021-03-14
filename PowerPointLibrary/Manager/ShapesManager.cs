@@ -36,9 +36,17 @@
                 float width,
                 float height)
         {
+
+            // add a shape then add picture 
+
+
+          //  PPT.Shape shapeOut1 = slide.Shapes.AddShape(OFFICE.MsoAutoShapeType.msoShapeRectangle, leftPosition, topPosition, width, height);
+
+
+
             PPT.Shape shapeOut = slide.Shapes.AddPicture(
                     file,
-                    OFFICE.MsoTriState.msoFalse,
+                    OFFICE.MsoTriState.msoTrue,
                     OFFICE.MsoTriState.msoTrue,
                     leftPosition,
                     topPosition,

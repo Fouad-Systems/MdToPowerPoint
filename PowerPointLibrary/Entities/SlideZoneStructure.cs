@@ -22,12 +22,12 @@ namespace PowerPointLibrary.Entities
         /// <summary>
         /// Line number in generated layout
         /// </summary>
-        //public int GLines { get; set; }
+        public int GLines { get; set; }
 
         /// <summary>
         /// Columns number in generated layout
         /// </summary>
-        //public int GColumns { get; set; }
+        public int GColumns { get; set; }
 
         public List<ContentTypes> ContentTypes { get; set; }
 

@@ -125,10 +125,11 @@ namespace PowerPointLibrary.BLO
                 CurrentSlide.GeneratedSlideZones.Add(TitleslideZoneStructure);
             }
 
+            int order = 1;
 
             foreach (var row in gLayoutStructure.Rows)
             {
-                int order = 1;
+               
                 foreach (var bloc in row.Blocs)
                 {
                     SlideZoneStructure slideZoneStructure = new SlideZoneStructure();
@@ -137,9 +138,10 @@ namespace PowerPointLibrary.BLO
                     slideZoneStructure.ContentTypes.Add(Entities.Enums.ContentTypes.Text);
                     slideZoneStructure.ContentTypes.Add(Entities.Enums.ContentTypes.Image);
 
-
-                    slideZoneStructure.Width = bloc.Lines * 90;
-                    slideZoneStructure.Height = bloc.Columns * 160;
+                    slideZoneStructure.GColumns = bloc.Columns;
+                    slideZoneStructure.GLines = bloc.Lines;
+                    slideZoneStructure.Width = bloc.Columns * 160;
+                    slideZoneStructure.Height = bloc.Lines * 90;
                     slideZoneStructure.Top = currentTop;
                     slideZoneStructure.Left = currentLeft;
 

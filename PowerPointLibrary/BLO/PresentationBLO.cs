@@ -386,12 +386,25 @@ namespace PowerPointLibrary.BLO
 
                         if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
                         {
+
+                            //var range = contenu_shape.Duplicate();
+                            //Microsoft.Office.Interop.PowerPoint.Shape shape1 = range[1];
+                            //shape1.Left = 100;
+                            //shape1.Top = 200;
+                            //shape1.Width = 400;
+                            //shape1.Height = 300;
+
+
+
                             var shape = contenu_shape.Duplicate()[1];
 
                             shape.Width = SlideZone.Width * ratio;
                             shape.Height = SlideZone.Height * ratio;
                             shape.Top = SlideZone.Top * ratio;
                             shape.Left = SlideZone.Left * ratio;
+                            // shape.Fill.BackColor.RGB = Color.Pink.ToArgb();
+
+                           // shape.Visible = MsoTriState.msoCTrue;
 
                             _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
 
@@ -405,14 +418,20 @@ namespace PowerPointLibrary.BLO
                         if (SlideZone.Images != null && SlideZone.Images.Count > 0)
                         {
 
-                            var shape = contenu_shape.Duplicate()[1];
 
-                            shape.Width = SlideZone.Width * ratio;
-                            shape.Height = SlideZone.Height * ratio;
-                            shape.Top = SlideZone.Top * ratio;
-                            shape.Left = SlideZone.Left * ratio;
+                            
 
-                           
+                            //var shape = contenu_shape.Duplicate()[1];
+
+                            //shape.Width = SlideZone.Width * ratio;
+                            //shape.Height = SlideZone.Height * ratio;
+                            //shape.Top = SlideZone.Top * ratio;
+                            //shape.Left = SlideZone.Left * ratio;
+                            //shape.Fill.BackColor.RGB = Color.Green.ToArgb();
+
+
+                            // shape.Visible = MsoTriState.msoTrue;
+
 
                             float shapeWidth = SlideZone.Width * ratio;
                             float shapeHeight = SlideZone.Height * ratio;
@@ -450,6 +469,11 @@ namespace PowerPointLibrary.BLO
                                 Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
                                     .AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
 
+                               // contenu_shape.Visible = MsoTriState.msoFalse;
+
+                                //Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
+                                //    .AddPicture(currentSlide, file, shape.Left, shape.Top, shape.Width, shape.Height);
+
                                 //  image_shape.AnimationSettings.AnimationOrder = 1;
                                 image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
                                 //file = @"E:\formations\formation-git-github\src\images\10.jpg";
@@ -463,7 +487,7 @@ namespace PowerPointLibrary.BLO
                       
                     }
 
-                    contenu_shape.Delete();
+                    contenu_shape.TextFrame.TextRange.Text = " ";
                 }
                 else
                 {
