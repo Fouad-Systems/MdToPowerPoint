@@ -171,8 +171,16 @@ namespace PowerPointLibrary.BLO
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.ListBlock List)
                 {
-                    _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, List);
-                    this.CurrentSlide.CurrentZone.Text.Text += "\r";
+                    if (this.CurrentSlide.AddToNotes)
+                    {
+                        _SlideBLO.AddNotes(List);
+                    }
+                    else
+                    {
+                        _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, List);
+                        this.CurrentSlide.CurrentZone.Text.Text += "\r";
+                    }
+                    
                 }
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.QuoteBlock Quote)
@@ -232,10 +240,9 @@ namespace PowerPointLibrary.BLO
                         if (this.CurrentSlide.AddToNotes)
                         {
 
-                            if (this.CurrentSlide.Notes == null) this.CurrentSlide.Notes = new SlideZoneStructure();
-                            if (this.CurrentSlide.Notes.Text == null) this.CurrentSlide.Notes.Text = new TextStructure();
+                            _SlideBLO.AddNotes(Paragraph);
 
-                            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.Notes, Paragraph);
+                          
 
                         }
                         else

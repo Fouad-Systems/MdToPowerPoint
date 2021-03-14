@@ -22,6 +22,7 @@ namespace PowerPointLibrary.BLO
 
             // CurrentDirectoryPath
             pplArguments.CurrentDirectoryPath = Environment.CurrentDirectory;
+            pplArguments.TemplatePath = "template.potx";
 
             // First params is the md document
             if (args != null)
@@ -52,19 +53,6 @@ namespace PowerPointLibrary.BLO
                     {
                         pplArguments.TemplatePath = args[i + 1];
 
-                        pplArguments.TemplateConfigurationPath = Path.Combine(pplArguments.CurrentDirectoryPath, pplArguments.TemplatePath.Replace(".potx", ".json"));
-                        pplArguments.TemplatePath = Path.Combine(pplArguments.CurrentDirectoryPath , pplArguments.TemplatePath);
-                        
-                        if (!File.Exists(pplArguments.TemplateConfigurationPath))
-                        {
-                            string msg = $"The configuration file '{pplArguments.TemplateConfigurationPath}' doesn't exist";
-                            throw new PplException(msg);
-                        }
-                        if (!File.Exists(pplArguments.TemplatePath))
-                        {
-                            string msg = $"The template file '{pplArguments.TemplatePath}' doesn't exist";
-                            throw new PplException(msg);
-                        }
                         i++;
                     }
 
@@ -78,6 +66,23 @@ namespace PowerPointLibrary.BLO
                 string msg = $"The file '{pplArguments.MdDocumentPath}' doesn't exist";
                 throw new PplException(msg);
             }
+
+            // Template Path
+            pplArguments.TemplateConfigurationPath = Path.Combine(pplArguments.CurrentDirectoryPath, pplArguments.TemplatePath.Replace(".potx", ".json"));
+            pplArguments.TemplatePath = Path.Combine(pplArguments.CurrentDirectoryPath, pplArguments.TemplatePath);
+
+            if (!File.Exists(pplArguments.TemplateConfigurationPath))
+            {
+                string msg = $"The configuration file '{pplArguments.TemplateConfigurationPath}' doesn't exist";
+                throw new PplException(msg);
+            }
+            if (!File.Exists(pplArguments.TemplatePath))
+            {
+                string msg = $"The template file '{pplArguments.TemplatePath}' doesn't exist";
+                throw new PplException(msg);
+            }
+      
+
 
             // MdDocumentDirectoryPath
             pplArguments.MdDocumentDirectoryPath = Path.GetDirectoryName(pplArguments.MdDocumentPath);

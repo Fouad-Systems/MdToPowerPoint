@@ -126,15 +126,20 @@ namespace PowerPointLibrary.BLO
                         SlideZone.Text.TextElementStyles.Add(new TextElementStyle(Start, Length, TextElementStyle.TextStyles.Blod));
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Italic:
-                        int StartItalic = SlideZone.Text.Text.Count() + 1;
-                        Microsoft.Toolkit.Parsers.Markdown.Inlines.ItalicTextInline italicTextInline = markdownInline as ItalicTextInline;
-                        string text_italic = (italicTextInline.Inlines[0] as TextRunInline).Text;
-                        int Lengthitalic = text_italic.Count();
-                        SlideZone.Text.Text += text_italic;
-                        SlideZone.Text.TextElementStyles.Add(new TextElementStyle(StartItalic, Lengthitalic, TextElementStyle.TextStyles.Italic));
+                        int start_ItalicTextInline = SlideZone.Text.Text.Count() + 1;
+                        Microsoft.Toolkit.Parsers.Markdown.Inlines.ItalicTextInline o_ItalicTextInline = markdownInline as ItalicTextInline;
+                        string text_ItalicTextInline = (o_ItalicTextInline.Inlines[0] as TextRunInline).Text;
+                        int Length_ItalicTextInline = text_ItalicTextInline.Count();
+                        SlideZone.Text.Text += text_ItalicTextInline;
+                        SlideZone.Text.TextElementStyles.Add(new TextElementStyle(start_ItalicTextInline, Length_ItalicTextInline, TextElementStyle.TextStyles.Italic));
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.MarkdownLink:
+                       
+                        Microsoft.Toolkit.Parsers.Markdown.Inlines.MarkdownLinkInline o_MarkdownLinkInline = markdownInline as MarkdownLinkInline;
+
+                        this.AddInLindesToSlideZone(SlideZone, o_MarkdownLinkInline.Inlines);
                         break;
+                    
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.RawHyperlink:
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.RawSubreddit:

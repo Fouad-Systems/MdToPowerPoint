@@ -7,7 +7,7 @@
     <ProjectGuid>{AF46AE2D-3CAD-4DBC-8F93-B821E039962F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>MdToPowerPoint</RootNamespace>
-    <AssemblyName>MdToPowerPoint</AssemblyName>
+    <AssemblyName>toppt</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\..\soft\MdToPowerPoint\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

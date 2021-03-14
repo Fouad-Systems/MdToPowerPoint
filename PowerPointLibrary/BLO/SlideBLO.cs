@@ -13,10 +13,12 @@ namespace PowerPointLibrary.BLO
     {
         public static string ZoneTitleName = "Titre";
         PresentationBLO _PresentationBLO;
+        SlideZoneStructureBLO _SlideZoneStructureBLO;
 
         public SlideBLO(PresentationBLO _PresentationBLO)
         {
             this._PresentationBLO = _PresentationBLO;
+            _SlideZoneStructureBLO = new SlideZoneStructureBLO();
         }
 
         public SlideStructure CurrentSlide
@@ -193,6 +195,15 @@ namespace PowerPointLibrary.BLO
         public void UseSlide(CommentAction commentAction)
         {
             this.CurrentSlide.UseSlideOrder = commentAction.UseSlideOrder;
+        }
+
+        public void AddNotes(MarkdownBlock paragraph)
+        {
+            if (this.CurrentSlide.Notes == null) this.CurrentSlide.Notes = new SlideZoneStructure();
+            if (this.CurrentSlide.Notes.Text == null) this.CurrentSlide.Notes.Text = new TextStructure();
+
+            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.Notes, paragraph);
+            this.CurrentSlide.Notes.Text.Text += "\r";
         }
     }
 }
