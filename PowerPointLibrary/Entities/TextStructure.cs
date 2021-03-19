@@ -12,34 +12,33 @@ namespace PowerPointLibrary.Entities
     /// </summary>
     public class TextElementStyle : ICloneable
     {
-        public enum TextStyles
-        {
-            Blod,
-            Italic,
-            Bullet
-        }
+
+        public bool IsBlod { get; set; }
+        public bool IsItalic { get; set; }
+        public bool IsBullet { get; set; }
+        public string FontColor { get; set; }
+
         public int Start;
         public int Length;
-        public TextStyles TextStyle;
+
         public ListStyle ListStyle;
 
-        public TextElementStyle()
-        {
-
-        }
-        public TextElementStyle(int Start, int Length, TextStyles TextStyle)
+      
+        public TextElementStyle(int Start, int Length)
         {
             this.Start = Start;
             this.Length = Length;
-            this.TextStyle = TextStyle;
         }
 
         public object Clone()
         {
-            TextElementStyle clone = new TextElementStyle();
+            TextElementStyle clone = new TextElementStyle(this.Start,this.Length);
             clone.Start = this.Start;
             clone.Length = this.Length;
-            clone.TextStyle = TextStyle;
+            clone.IsBlod = IsBlod;
+            clone.IsItalic = IsItalic;
+            clone.IsBullet = IsBullet;
+            clone.FontColor = FontColor;
             return clone;
 
         }

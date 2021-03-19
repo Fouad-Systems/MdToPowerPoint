@@ -8,43 +8,50 @@ using System.Text;
 using ColorCode.HTML.Common;
 using ColorCode.Styling;
 using System.Net;
+using PowerPointLibrary.Entities;
+using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 
 namespace ColorCode
 {
     /// <summary>
-    /// Creates a <see cref="HtmlFormatter"/>, for creating HTML to display Syntax Highlighted code.
+    /// 
     /// </summary>
-    public class HtmlFormatter : CodeColorizerBase
+    public class TexteStructureCodeColorizer : CodeColorizerBase
     {
         /// <summary>
-        /// Creates a <see cref="HtmlFormatter"/>, for creating HTML to display Syntax Highlighted code.
+        /// 
         /// </summary>
         /// <param name="Style">The Custom styles to Apply to the formatted Code.</param>
-        /// <param name="languageParser">The language parser that the <see cref="HtmlFormatter"/> instance will use for its lifetime.</param>
-        public HtmlFormatter(StyleDictionary Style = null, ILanguageParser languageParser = null) : base(Style, languageParser)
+        /// <param name="languageParser">The language parser that the <see cref="TexteStructureCodeColorizer"/> instance will use for its lifetime.</param>
+        public TexteStructureCodeColorizer(TextStructure TextStructure, StyleDictionary Style = null, ILanguageParser languageParser = null) : base(Style, languageParser)
         {
+            this.TextStructure = TextStructure;
         }
 
         private TextWriter Writer { get; set; }
+        public TextStructure TextStructure { get; set; }
 
 
 
         /// <summary>
-        /// Creates the HTML Markup, which can be saved to a .html file.
+        /// 
         /// </summary>
         /// <param name="sourceCode">The source code to colorize.</param>
         /// <param name="language">The language to use to colorize the source code.</param>
         /// <returns>Colorised HTML Markup.</returns>
-        public string GetHtmlString(string sourceCode, ILanguage language)
+        public string SetCodeBlock(CodeBlock codeBlock )
         {
-            var buffer = new StringBuilder(sourceCode.Length * 2);
+
+            ILanguage language = Languages.FindById(codeBlock.CodeLanguage);
+
+            var buffer = new StringBuilder(codeBlock.Text.Length * 2);
 
             using (TextWriter writer = new StringWriter(buffer))
             {
                 Writer = writer;
                 WriteHeader(language);
 
-                languageParser.Parse(sourceCode, language, (parsedSourceCode, captures) => Write(parsedSourceCode, captures));
+                languageParser.Parse(codeBlock.Text, language, (parsedSourceCode, captures) => Write(parsedSourceCode, captures));
 
                 WriteFooter(language);
 
@@ -65,18 +72,47 @@ namespace ColorCode
 
             int offset = 0;
 
+            this.TextStructure.Text += parsedSourceCode;
+
             foreach (TextInsertion styleInsertion in styleInsertions)
             {
+                Style style = null;
+
+
                 var text = parsedSourceCode.Substring(offset, styleInsertion.Index - offset);
-                Writer.Write(WebUtility.HtmlEncode(text));
-                if (string.IsNullOrEmpty(styleInsertion.Text))
-                    BuildSpanForCapturedStyle(styleInsertion.Scope);
-                else
-                    Writer.Write(styleInsertion.Text);
-                offset = styleInsertion.Index;
+
+                //var text = parsedSourceCode.Substring(styleInsertion.Index, styleInsertion.Scope.Length);
+              
+                offset = styleInsertion.Scope.Length;
+                this.AddTextElementStyle(styleInsertion);
+
             }
 
-            Writer.Write(WebUtility.HtmlEncode(parsedSourceCode.Substring(offset)));
+
+
+
+        }
+
+        private void AddTextElementStyle(TextInsertion TextInsertion)
+        {
+            var  style = GetStyleForScope(TextInsertion.Scope);
+
+            if (style != null)
+            {
+                // les caractère sont enlever '\n'
+                int Start = TextStructure.Text.Replace("\n","").Length + 1;
+                int Length = text.Length;
+                this.TextStructure.Text += text;
+
+                TextElementStyle textElementStyle = new TextElementStyle(Start, Length);
+                textElementStyle.IsBlod = style.Bold;
+                textElementStyle.IsItalic = style.Italic;
+                textElementStyle.FontColor = style.Foreground;
+
+
+                this.TextStructure.TextElementStyles.Add(textElementStyle);
+
+            }
         }
 
         private void WriteFooter(ILanguage language)
@@ -104,31 +140,32 @@ namespace ColorCode
             foreach (Scope childScope in scope.Children)
                 GetStyleInsertionsForCapturedStyle(childScope, styleInsertions);
 
-            styleInsertions.Add(new TextInsertion
-            {
-                Index = scope.Index + scope.Length,
-                Text = "</span>"
-            });
+            //styleInsertions.Add(new TextInsertion
+            //{
+            //    Index = scope.Index + scope.Length,
+            //    Text = "</span>"
+            //});
         }
 
-        private void BuildSpanForCapturedStyle(Scope scope)
+        private Style GetStyleForScope(Scope scope)
         {
-            string foreground = string.Empty;
-            string background = string.Empty;
-            bool italic = false;
-            bool bold = false;
+            Style rStyle = new Style("value");
+            rStyle.Foreground = string.Empty;
+            rStyle.Background = string.Empty;
+            rStyle.Italic = false;
+            rStyle.Bold = false;
 
             if (Styles.Contains(scope.Name))
             {
                 Style style = Styles[scope.Name];
 
-                foreground = style.Foreground;
-                background = style.Background;
-                italic = style.Italic;
-                bold = style.Bold;
+                rStyle.Foreground = style.Foreground;
+                rStyle.Background = style.Background;
+                rStyle.Italic = style.Italic;
+                rStyle.Bold = style.Bold;
             }
 
-            WriteElementStart("span", foreground, background, italic, bold);
+            return rStyle;
         }
 
         private void WriteHeaderDivEnd()

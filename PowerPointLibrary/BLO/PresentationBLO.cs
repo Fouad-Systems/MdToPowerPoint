@@ -329,7 +329,7 @@ namespace PowerPointLibrary.BLO
 
         public void GeneratePresentation()
         {
-            this.PandocCommande("");
+            // this.PandocCommande("");
 
             //string output = process.StandardOutput.ReadToEnd();
            
@@ -544,10 +544,10 @@ namespace PowerPointLibrary.BLO
                         if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
                         {
 
-                            Thread thread = new Thread(() => Clipboard.SetText(SlideZone.Text.Text, TextDataFormat.UnicodeText));
-                            thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
-                            thread.Start();
-                            thread.Join();
+                            //Thread thread = new Thread(() => Clipboard.SetText(SlideZone.Text.Text, TextDataFormat.UnicodeText));
+                            //thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
+                            //thread.Start();
+                            //thread.Join();
 
                          
 
@@ -557,11 +557,11 @@ namespace PowerPointLibrary.BLO
                             //shape.TextFrame
                             //// Clipboard.SetText();
                             //// shape.TextFrame.TextRange.Paste();
-                            shape.TextFrame.TextRange.PasteSpecial(PpPasteDataType.ppPasteText) ;
+                            // shape.TextFrame.TextRange.PasteSpecial(PpPasteDataType.ppPasteText) ;
 
                          
 
-                            //  _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
+                            _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
 
                             if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
                             {

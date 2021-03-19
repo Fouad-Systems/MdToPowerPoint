@@ -73,25 +73,11 @@ namespace PowerPointLibrary.BLO
 
             // codeBlock.Text
             var code = codeBlock.Text;
-            var formatter = new HtmlFormatter();
-            var html = formatter.GetHtmlString(code, Languages.JavaScript);
-            Console.WriteLine(html);
+            var formatter = new TexteStructureCodeColorizer(SlideZone.Text);
 
 
-
-
-            SlideZone.Text.Text += code;
-
-
-            int Start = SlideZone.Text.Text.Count() + 1;
-
+            formatter.SetCodeBlock(codeBlock);
  
-            string text_blod = (boldTextInline.Inlines[0] as TextRunInline).Text;
-            int Length = text_blod.Count();
-            SlideZone.Text.Text += text_blod;
-            SlideZone.Text.TextElementStyles.Add(new TextElementStyle(Start, Length, TextElementStyle.TextStyles.Blod));
-            break;
-
 
         }
 
@@ -123,8 +109,15 @@ namespace PowerPointLibrary.BLO
                     int Start = SlideZone.Text.Text.Count() + 1;
                     this.AddMarkdownBlockToSlideZone(SlideZone, markdownBlock);
                     int Length = SlideZone.Text.Text.Count() - Start;
+
+                    TextElementStyle textElement = new TextElementStyle(Start, Length);
+                    textElement.IsBlod = true;
+                    textElement.Start = Start;
+                    textElement.ListStyle = listBlock.Style;
+
+
                     SlideZone.Text.TextElementStyles
-                        .Add(new TextElementStyle(Start, Length, TextElementStyle.TextStyles.Bullet) { ListStyle = listBlock.Style });
+                        .Add(textElement);
 
                 }
 
@@ -160,7 +153,9 @@ namespace PowerPointLibrary.BLO
                         string text_blod = (boldTextInline.Inlines[0] as TextRunInline).Text;
                         int Length = text_blod.Count();
                         SlideZone.Text.Text += text_blod;
-                        SlideZone.Text.TextElementStyles.Add(new TextElementStyle(Start, Length, TextElementStyle.TextStyles.Blod));
+                        TextElementStyle TextElementStyle = new TextElementStyle(Start, Length);
+                        TextElementStyle.IsBlod = true;
+                        SlideZone.Text.TextElementStyles.Add(TextElementStyle);
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Italic:
                         int start_ItalicTextInline = SlideZone.Text.Text.Count() + 1;
@@ -168,7 +163,10 @@ namespace PowerPointLibrary.BLO
                         string text_ItalicTextInline = (o_ItalicTextInline.Inlines[0] as TextRunInline).Text;
                         int Length_ItalicTextInline = text_ItalicTextInline.Count();
                         SlideZone.Text.Text += text_ItalicTextInline;
-                        SlideZone.Text.TextElementStyles.Add(new TextElementStyle(start_ItalicTextInline, Length_ItalicTextInline, TextElementStyle.TextStyles.Italic));
+
+                        TextElementStyle TextElementStyle2 = new TextElementStyle(start_ItalicTextInline, Length_ItalicTextInline);
+                        TextElementStyle2.IsItalic = true;
+                        SlideZone.Text.TextElementStyles.Add(TextElementStyle2);
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.MarkdownLink:
                        

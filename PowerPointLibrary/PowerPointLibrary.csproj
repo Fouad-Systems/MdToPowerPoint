@@ -92,7 +92,7 @@
     <Compile Include="Exceptions\PplException.cs" />
     <Compile Include="html\ExtensionMethods.cs" />
     <Compile Include="html\HtmlClassFormatter.cs" />
-    <Compile Include="html\HtmlFormatter.cs" />
+    <Compile Include="html\TexteStructureCodeColorizer.cs" />
     <Compile Include="Manager\Contracts\IChartManager.cs" />
     <Compile Include="Manager\Contracts\IPowerPointManager.cs" />
     <Compile Include="Manager\Contracts\IPresentationManager.cs" />
