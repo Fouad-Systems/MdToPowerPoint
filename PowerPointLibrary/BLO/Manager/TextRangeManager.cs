@@ -16,9 +16,6 @@ namespace PowerPointLibrary.Manager
             textRange.Text = textStructure.Text;
 
 
-          
-
-
             foreach (var textElement in textStructure.TextElementStyles)
             {
 
@@ -37,8 +34,11 @@ namespace PowerPointLibrary.Manager
                 if (!string.IsNullOrEmpty(textElement.FontColor))
                 {
                     textRangePart.Font.Bold = Microsoft.Office.Core.MsoTriState.msoCTrue;
-                    textRangePart.Font.Color.RGB = ColorTranslator.FromHtml(textElement.FontColor).ToArgb();
-                   // textRangePart.Font.Color.RGB = Color.Red.ToArgb();
+                    var fromHTML = ColorTranslator.FromHtml(textElement.FontColor);
+                    // var fromHTML2 = ColorTranslator.ToHtml(fromHTML);
+                    var Color1 = ColorTranslator.FromHtml("#068dbd");
+                    textRangePart.Font.Color.RGB = System.Drawing.ColorTranslator.ToOle(Color1);
+                    // textRangePart.Font.Color.RGB = Color.Red.ToArgb();
                 }
 
                 if (textElement.IsBullet)

@@ -77,14 +77,9 @@ namespace MdToPowerPoint
             PresentationBLO presentationBLO = new PresentationBLO(pplArguments);
             presentationBLO.Create();
 
-            // Create Presentation DataStructure 
-            presentationBLO.CreatePresentationDataStructure(mdDocument);
+            presentationBLO.CreatePresentation(mdDocument);
 
-
-
-            // Create Presentation from PresentationDataStructure
             
-            presentationBLO.GeneratePresentation();
 
 
            // System.Diagnostics.Process.Start(Environment.CurrentDirectory);

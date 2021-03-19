@@ -12,22 +12,25 @@ namespace PowerPointLibrary.BLO
     public class SlideBLO
     {
         public static string ZoneTitleName = "Titre";
-        PresentationBLO _PresentationBLO;
+     
         SlideZoneStructureBLO _SlideZoneStructureBLO;
         TemplateStructureBLO _TemplateStructureBLO;
 
-        public SlideBLO(PresentationBLO _PresentationBLO)
+      
+        PresentationStructure  _PresentationStructure;
+
+        public SlideBLO(PresentationStructure _PresentationStructure)
         {
-            this._PresentationBLO = _PresentationBLO;
+            this._PresentationStructure = _PresentationStructure;
             _SlideZoneStructureBLO = new SlideZoneStructureBLO();
-            _TemplateStructureBLO = new TemplateStructureBLO(_PresentationBLO._PresentationStructure);
+            _TemplateStructureBLO = new TemplateStructureBLO(_PresentationStructure);
         }
 
         public SlideStructure CurrentSlide
         {
             get
             {
-                return _PresentationBLO.CurrentSlide;
+                return _PresentationStructure.CurrentSlide;
             }
         }
 
@@ -81,9 +84,9 @@ namespace PowerPointLibrary.BLO
             var TemplateSlide = _TemplateStructureBLO.GetSlide(Layout);
 
             SlideStructure slideStructure = new SlideStructure();
-            _PresentationBLO._PresentationStructure.Slides.Add(slideStructure);
+            _PresentationStructure.Slides.Add(slideStructure);
 
-            slideStructure.Name = "Slide" + _PresentationBLO._PresentationStructure.Slides.Count;
+            slideStructure.Name = "Slide" + _PresentationStructure.Slides.Count;
             slideStructure.Layout = Layout;
             slideStructure.TemplateSlide = TemplateSlide;
             slideStructure.SlideZones = TemplateSlide.SlideZones.Select(s => s.Clone() as SlideZoneStructure).ToList();
@@ -212,12 +215,12 @@ namespace PowerPointLibrary.BLO
 
         public void StartWriteToNote()
         {
-            _PresentationBLO.CurrentSlide.AddToNotes = true;
+            CurrentSlide.AddToNotes = true;
         }
 
         public void EndWriteToNote()
         {
-            _PresentationBLO.CurrentSlide.AddToNotes = false;
+            CurrentSlide.AddToNotes = false;
         }
 
         public void UseSlide(CommentAction commentAction)

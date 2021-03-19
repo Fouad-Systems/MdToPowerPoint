@@ -72,7 +72,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BLO\CodeBLO.cs" />
     <Compile Include="BLO\CommentActionBLO.cs" />
+    <Compile Include="BLO\GeneratePresentationBLO.cs" />
     <Compile Include="BLO\GLayoutStructureBLO.cs" />
     <Compile Include="BLO\ParagraphBlockBLO.cs" />
     <Compile Include="BLO\PplArgumentsBLO.cs" />
@@ -93,23 +95,23 @@
     <Compile Include="html\ExtensionMethods.cs" />
     <Compile Include="html\HtmlClassFormatter.cs" />
     <Compile Include="html\TexteStructureCodeColorizer.cs" />
-    <Compile Include="Manager\Contracts\IChartManager.cs" />
-    <Compile Include="Manager\Contracts\IPowerPointManager.cs" />
-    <Compile Include="Manager\Contracts\IPresentationManager.cs" />
-    <Compile Include="Manager\Contracts\IShapesManager.cs" />
-    <Compile Include="Manager\Contracts\ISlideManager.cs" />
-    <Compile Include="Manager\Enumerations\ImageFormats.cs" />
-    <Compile Include="Manager\Enumerations\Locations.cs" />
-    <Compile Include="Manager\Enumerations\Trendlines.cs" />
-    <Compile Include="Manager\TextRangeManager.cs" />
+    <Compile Include="BLO\Manager\Contracts\IChartManager.cs" />
+    <Compile Include="BLO\Manager\Contracts\IPowerPointManager.cs" />
+    <Compile Include="BLO\Manager\Contracts\IPresentationManager.cs" />
+    <Compile Include="BLO\Manager\Contracts\IShapesManager.cs" />
+    <Compile Include="BLO\Manager\Contracts\ISlideManager.cs" />
+    <Compile Include="BLO\Manager\Enumerations\ImageFormats.cs" />
+    <Compile Include="BLO\Manager\Enumerations\Locations.cs" />
+    <Compile Include="BLO\Manager\Enumerations\Trendlines.cs" />
+    <Compile Include="BLO\Manager\TextRangeManager.cs" />
     <Compile Include="BLO\PresentationBLO.cs" />
-    <Compile Include="Manager\PowerPointApplicationManager.cs" />
-    <Compile Include="Manager\PresentationManager.cs" />
-    <Compile Include="Manager\ShapesManager.cs" />
-    <Compile Include="Manager\SlideManager.cs" />
-    <Compile Include="Manager\Objects\ShapesofType.cs" />
-    <Compile Include="Manager\Objects\SlideComment.cs" />
-    <Compile Include="Manager\Objects\SlideDimensions.cs" />
+    <Compile Include="BLO\Manager\PowerPointApplicationManager.cs" />
+    <Compile Include="BLO\Manager\PresentationManager.cs" />
+    <Compile Include="BLO\Manager\ShapesManager.cs" />
+    <Compile Include="BLO\Manager\SlideManager.cs" />
+    <Compile Include="BLO\Manager\Objects\ShapesofType.cs" />
+    <Compile Include="BLO\Manager\Objects\SlideComment.cs" />
+    <Compile Include="BLO\Manager\Objects\SlideDimensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Entities\PresentationStructure.cs" />
   </ItemGroup>

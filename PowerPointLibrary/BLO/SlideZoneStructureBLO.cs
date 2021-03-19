@@ -1,6 +1,8 @@
 ﻿using ColorCode;
+using ColorCode.Common;
 using ColorCode.Compilation;
 using ColorCode.Parsing;
+using ColorCode.Styling;
 using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 using Microsoft.Toolkit.Parsers.Markdown.Inlines;
 using PowerPointLibrary.Entities;
@@ -69,17 +71,20 @@ namespace PowerPointLibrary.BLO
         private void AddCodeToSlideZone(SlideZoneStructure SlideZone, CodeBlock codeBlock)
         {
 
-
-
+            var DefaulStyle = new CodeBLO().GetDefaultCodeStyle();
+ 
             // codeBlock.Text
             var code = codeBlock.Text;
-            var formatter = new TexteStructureCodeColorizer(SlideZone.Text);
+            var formatter = new TexteStructureCodeColorizer(SlideZone.Text, DefaulStyle);
 
 
             formatter.SetCodeBlock(codeBlock);
  
 
         }
+
+     
+ 
 
         private void TrimFirstInlines(HeaderBlock headerBlock)
         {
