@@ -1,4 +1,7 @@
-﻿using Microsoft.Toolkit.Parsers.Markdown.Blocks;
+﻿using ColorCode;
+using ColorCode.Compilation;
+using ColorCode.Parsing;
+using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 using Microsoft.Toolkit.Parsers.Markdown.Inlines;
 using PowerPointLibrary.Entities;
 using System;
@@ -26,6 +29,11 @@ namespace PowerPointLibrary.BLO
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Quote:
                     break;
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Code:
+                    Microsoft.Toolkit.Parsers.Markdown.Blocks.CodeBlock CodeBlock = markdownBlock as CodeBlock;
+                    this.AddCodeToSlideZone(SlideZone, CodeBlock);
+
+                 
+
                     break;
                 case Microsoft.Toolkit.Parsers.Markdown.MarkdownBlockType.Header:
 
@@ -55,6 +63,35 @@ namespace PowerPointLibrary.BLO
                 default:
                     break;
             }
+
+        }
+
+        private void AddCodeToSlideZone(SlideZoneStructure SlideZone, CodeBlock codeBlock)
+        {
+
+
+
+            // codeBlock.Text
+            var code = codeBlock.Text;
+            var formatter = new HtmlFormatter();
+            var html = formatter.GetHtmlString(code, Languages.JavaScript);
+            Console.WriteLine(html);
+
+
+
+
+            SlideZone.Text.Text += code;
+
+
+            int Start = SlideZone.Text.Text.Count() + 1;
+
+ 
+            string text_blod = (boldTextInline.Inlines[0] as TextRunInline).Text;
+            int Length = text_blod.Count();
+            SlideZone.Text.Text += text_blod;
+            SlideZone.Text.TextElementStyles.Add(new TextElementStyle(Start, Length, TextElementStyle.TextStyles.Blod));
+            break;
+
 
         }
 

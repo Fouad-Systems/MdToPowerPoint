@@ -14,6 +14,9 @@ using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 using PowerPointLibrary.Helper.Enumerations;
 using System.Drawing;
 using PowerPointLibrary.Exceptions;
+using System.Windows.Forms;
+using System.Threading;
+using System.Diagnostics;
 
 namespace PowerPointLibrary.BLO
 {
@@ -24,7 +27,7 @@ namespace PowerPointLibrary.BLO
     {
 
         #region Attributes
-        internal Application _Application;
+        internal Microsoft.Office.Interop.PowerPoint.Application _Application;
         internal Presentation _Presentation;
         // internal PresentationStructure _TemplateStructure;
         internal PresentationStructure _PresentationStructure;
@@ -173,6 +176,32 @@ namespace PowerPointLibrary.BLO
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.CodeBlock code)
                 {
+                    if (this.CurrentSlide.AddToNotes)
+                    {
+                        _SlideBLO.AddNotes(code);
+
+                    }
+                    else
+                    {
+
+                        _SlideBLO.WriteToTextZone();
+
+
+                        if (this.CurrentSlide.CurrentZone != null)
+                        {
+                            if (this.CurrentSlide.CurrentZone.Text == null)
+                                this.CurrentSlide.CurrentZone.Text = new TextStructure();
+
+                            // return à la ligne si une nouvelle paragraphe est ajouté
+                            int count_befor = this.CurrentSlide.CurrentZone.Text.Text.Count();
+                            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, code);
+                            if (this.CurrentSlide.CurrentZone.Text.Text.Count() > count_befor)
+                                this.CurrentSlide.CurrentZone.Text.Text += "\r";
+
+
+                        }
+
+                    }
                 }
 
                 if (element is Microsoft.Toolkit.Parsers.Markdown.Blocks.LinkReferenceBlock LinkReference)
@@ -300,6 +329,14 @@ namespace PowerPointLibrary.BLO
 
         public void GeneratePresentation()
         {
+            this.PandocCommande("");
+
+            //string output = process.StandardOutput.ReadToEnd();
+           
+
+            //string errors = process.StandardError.ReadToEnd();
+            
+
 
             // Add Slides
             foreach (var slide in _PresentationStructure.Slides)
@@ -469,7 +506,7 @@ namespace PowerPointLibrary.BLO
                                 Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
                                     .AddPicture(currentSlide, file, left, top, scaledWidth, scaledHeight);
 
-                               // contenu_shape.Visible = MsoTriState.msoFalse;
+                                // contenu_shape.Visible = MsoTriState.msoFalse;
 
                                 //Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
                                 //    .AddPicture(currentSlide, file, shape.Left, shape.Top, shape.Width, shape.Height);
@@ -507,7 +544,24 @@ namespace PowerPointLibrary.BLO
                         if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
                         {
 
-                            _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
+                            Thread thread = new Thread(() => Clipboard.SetText(SlideZone.Text.Text, TextDataFormat.UnicodeText));
+                            thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
+                            thread.Start();
+                            thread.Join();
+
+                         
+
+                            //  slideRange.Shapes.AddShape(MsoAutoShapeType.msoShapeLineCallout1, 1, 1, 1, 1);
+                            // slideRange.Shapes.PasteSpecial(PpPasteDataType.ppPasteHTML);
+
+                            //shape.TextFrame
+                            //// Clipboard.SetText();
+                            //// shape.TextFrame.TextRange.Paste();
+                            shape.TextFrame.TextRange.PasteSpecial(PpPasteDataType.ppPasteText) ;
+
+                         
+
+                            //  _TextRangeManager.AddTextStructure(shape.TextFrame.TextRange, SlideZone.Text);
 
                             if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
                             {
@@ -583,6 +637,22 @@ namespace PowerPointLibrary.BLO
             this.SaveAs(this.pplArguments.OutPutFile);
             this.Close();
 
+        }
+
+
+
+        private void PandocCommande(string v)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.FileName = @"powershell.exe";
+            startInfo.Arguments = @" pandoc E:\formations\11.React\src\hello-world-react.md -o E:\formations\11.React\src\bb.pptx ";
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+            startInfo.UseShellExecute = false;
+            startInfo.CreateNoWindow = true;
+            Process process = new Process();
+            process.StartInfo = startInfo;
+            process.Start();
         }
 
         public SlideStructure CurrentSlide
