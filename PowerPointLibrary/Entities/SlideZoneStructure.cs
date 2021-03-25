@@ -99,6 +99,15 @@ namespace PowerPointLibrary.Entities
                 return false;
         }
 
+        public bool IsTitle()
+        {
+            if (this.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                return true;
+            else
+                return false;
+          
+        }
+
         // public ImageStructure { get; set; }
     }
 }

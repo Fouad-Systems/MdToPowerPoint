@@ -33,6 +33,7 @@ namespace PowerPointLibrary.Manager
 
                 if (!string.IsNullOrEmpty(textElement.FontColor))
                 {
+                   
                     textRangePart.Font.Bold = Microsoft.Office.Core.MsoTriState.msoCTrue;
                     var fromHTML = ColorTranslator.FromHtml(textElement.FontColor);
                     // var fromHTML2 = ColorTranslator.ToHtml(fromHTML);

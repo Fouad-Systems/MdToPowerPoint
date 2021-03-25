@@ -113,7 +113,12 @@ namespace PowerPointLibrary.BLO
 
             if (this.CurrentSlide.IsGenerated == false)
             {
-                if (this.CurrentSlide.CurrentZone == null || !this.CurrentSlide.CurrentZone.IsImage())
+                if (
+                    this.CurrentSlide.CurrentZone == null 
+                    || this.CurrentSlide.CurrentZone.IsImage()
+                    || this.CurrentSlide.CurrentZone.IsTitle()
+                   
+                    )
                 {
 
                     int CurrentZoneOrder = this.CurrentSlide.SlideZones.Where(z => !z.IsEmpty()).Count();
