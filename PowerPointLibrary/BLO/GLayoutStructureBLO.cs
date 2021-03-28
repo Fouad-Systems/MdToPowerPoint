@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
+    /// <summary>
+    /// Generate SlideZone 
+    /// </summary>
     public class GLayoutStructureBLO
     {
 
@@ -17,19 +20,21 @@ namespace PowerPointLibrary.BLO
             //  t 6 6
             //  t-2 6-3 6-9
             //  t-2 3-3 3-5 3-3
+            //  t 7-5 5-5 12-3 p-30
 
 
             var parts = layout.Split(' ');
 
             foreach (string bloc in parts)
             {
+                // Title
                 if (bloc.StartsWith("t"))
                 {
-                    if(bloc.Count()> 1)
+                    if (bloc.Count() > 1)
                     {
                         var title_parts = bloc.Split('-');
-                        
-                        if(title_parts.Length != 2)
+
+                        if (title_parts.Length != 2)
                         {
                             throw new PplException($"The title ligne '{bloc}' must be as t-2 ");
                         }
@@ -40,32 +45,54 @@ namespace PowerPointLibrary.BLO
                     {
                         gLayoutStructure.TitleLines = 1;
                     }
+
+                    continue;
                 }
-                else
+
+                // Padding
+                if (bloc.StartsWith("p"))
                 {
-                    
-                    var bloc_parts = bloc.Split('-');
-                    int cols = 0;
-                    int lines = 0;
-
-                    if (bloc_parts.Length == 1)
+                    if (bloc.Count() > 1)
                     {
-                        cols = Convert.ToInt32(bloc_parts[0]);
-                       
+                        var padding_parts = bloc.Split('-');
 
-                        lines = 12 - 1 - gLayoutStructure.TitleLines;
+                        if (padding_parts.Length != 2)
+                        {
+                            throw new PplException($"The padding  '{bloc}' must be as p-30 ");
+                        }
+                        gLayoutStructure.Padding = Convert.ToInt32(padding_parts[1]);
                     }
                     else
                     {
-                         cols = Convert.ToInt32(bloc_parts[0]);
-                         lines = Convert.ToInt32(bloc_parts[1]);
+                        gLayoutStructure.Padding = 30;
                     }
 
-                    if (cols > 12) throw new PplException($"The columns '{bloc}' mast be < 12");
-                    if (lines > 12) throw new PplException($"The lines '{bloc}' mast be < 12");
-
-                    this.AddBloc(gLayoutStructure, cols, lines);
+                    continue;
                 }
+
+
+
+                var bloc_parts = bloc.Split('-');
+                int cols = 0;
+                int lines = 0;
+
+                if (bloc_parts.Length == 1)
+                {
+                    cols = Convert.ToInt32(bloc_parts[0]);
+
+
+                    lines = 12 - 1 - gLayoutStructure.TitleLines;
+                }
+                else
+                {
+                    cols = Convert.ToInt32(bloc_parts[0]);
+                    lines = Convert.ToInt32(bloc_parts[1]);
+                }
+
+                if (cols > 12) throw new PplException($"The columns '{bloc}' mast be < 12");
+                if (lines > 12) throw new PplException($"The lines '{bloc}' mast be < 12");
+
+                this.AddBloc(gLayoutStructure, cols, lines);
             }
 
 
@@ -89,7 +116,7 @@ namespace PowerPointLibrary.BLO
 
             var SlideLines = gLayoutStructure.Rows.Sum(r => r.Blocs.Max(b => b.Lines));
 
-            if( (SlideLines + gLayoutStructure.TitleLines) > 12)
+            if ((SlideLines + gLayoutStructure.TitleLines) > 12)
             {
                 throw new PplException($"The layout lines is more then 12");
 
@@ -99,26 +126,37 @@ namespace PowerPointLibrary.BLO
         }
 
 
+        /// <summary>
+        /// Generate Slide zone
+        /// </summary>
+        /// <param name="CurrentSlide"></param>
+        /// <param name="gLayoutStructure"></param>
         public void GenerateSlideZone(SlideStructure CurrentSlide, GLayoutStructure gLayoutStructure)
         {
-
-            int currentTop  = 0;
-            int currentLeft = 0;
+            SlideZoneStructureBLO _SlideZoneStructureBLO = new SlideZoneStructureBLO();
+            float currentTop = 0;
+            float currentLeft = 0;
             CurrentSlide.IsGenerated = true;
+
+            // Default value 
+            float ColumnHeight = 90;
+            float ColumnWith = 160;
+            float SlideHeight = 1080;
 
             if (CurrentSlide.GeneratedSlideZones == null)
                 CurrentSlide.GeneratedSlideZones = new List<SlideZoneStructure>();
 
-
+            // Add Title Zone
             if (gLayoutStructure.TitleLines > 0)
             {
                 SlideZoneStructure TitleslideZoneStructure = new SlideZoneStructure();
                 TitleslideZoneStructure.Order = 1;
                 TitleslideZoneStructure.Name = "Title";
+                TitleslideZoneStructure.ContentTypes.Add(Entities.Enums.ContentTypes.Title);
                 TitleslideZoneStructure.Top = 0;
                 TitleslideZoneStructure.Left = 0;
-                TitleslideZoneStructure.Width = 160 * 12;
-                TitleslideZoneStructure.Height = 90 * 2;
+                TitleslideZoneStructure.Width = ColumnWith * 12;
+                TitleslideZoneStructure.Height = ColumnHeight * 2;
                 TitleslideZoneStructure.Row = 1;
 
                 currentTop += TitleslideZoneStructure.Height;
@@ -127,24 +165,25 @@ namespace PowerPointLibrary.BLO
             }
 
             int order = 1;
-            int padding = 30;
+            int padding = gLayoutStructure.Padding;
             int RowNumber = 2;
 
             foreach (var row in gLayoutStructure.Rows)
             {
-               
+
                 foreach (var bloc in row.Blocs)
                 {
                     SlideZoneStructure slideZoneStructure = new SlideZoneStructure();
-
+                    slideZoneStructure.ContentTypes.Add(Entities.Enums.ContentTypes.Text);
+                    slideZoneStructure.ContentTypes.Add(Entities.Enums.ContentTypes.Image);
                     slideZoneStructure.Order = ++order;
                     slideZoneStructure.ContentTypes.Add(Entities.Enums.ContentTypes.Text);
                     slideZoneStructure.ContentTypes.Add(Entities.Enums.ContentTypes.Image);
 
                     slideZoneStructure.GColumns = bloc.Columns;
                     slideZoneStructure.GLines = bloc.Lines;
-                    slideZoneStructure.Width = bloc.Columns * 160 - padding * 2;
-                    slideZoneStructure.Height = bloc.Lines * 90 - padding * 2;
+                    slideZoneStructure.Width = bloc.Columns * ColumnWith - padding * 2;
+                    slideZoneStructure.Height = bloc.Lines * ColumnHeight - padding * 2;
                     slideZoneStructure.Top = currentTop + padding;
                     slideZoneStructure.Left = currentLeft + padding;
                     slideZoneStructure.Row = RowNumber;
@@ -154,21 +193,13 @@ namespace PowerPointLibrary.BLO
                 }
 
                 RowNumber++;
-                int row_Height = row.Blocs.Max(b => b.Lines) * 90;
+                float row_Height = row.Blocs.Max(b => b.Lines) * ColumnHeight;
                 currentTop += row_Height;
                 currentLeft = 0;
 
-
-             
-
-               
-
-
-
-
             }
 
-
+            // Center the second Zone 
             int rowNumber = 1;
             foreach (var row in gLayoutStructure.Rows)
             {
@@ -176,36 +207,44 @@ namespace PowerPointLibrary.BLO
                 rowNumber++;
                 if (zones.Count() == 1) continue;
 
-                int max_height = zones.Max(z => z.Height);
+                float max_height = zones.Max(z => z.Height);
 
                 foreach (var zone in zones)
                 {
                     zone.Top += (max_height - zone.Height) / 2;
                 }
-
-
-               
             }
-
-             
-          
-
-
-
-
-            // this.CopySlideZoneToGeneratedSlideZone();
 
             // Copy TitleZone
             var TitleZone = CurrentSlide.CurrentZone;
 
-            if (CurrentSlide.CurrentZone.Name == "Title" || CurrentSlide.CurrentZone.Name == "Titre")
+            if ( _SlideZoneStructureBLO.IsTitle(TitleZone))
             {
                 CurrentSlide.CurrentZone = CurrentSlide.GeneratedSlideZones.First();
                 CurrentSlide.CurrentZone.Text = TitleZone.Text.Clone() as TextStructure;
                 CurrentSlide.CurrentZone.Name = TitleZone.Name;
-
             }
 
+            // Center the content in the slide
+
+            float ContentHeight = 0;
+            foreach (var row in gLayoutStructure.Rows)
+            {
+
+                float row_Height = row.Blocs.Max(b => b.Lines) * ColumnHeight;
+                ContentHeight += row_Height;
+            }
+            float freeHeigh = SlideHeight - ContentHeight - ColumnHeight * gLayoutStructure.TitleLines ;
+            freeHeigh -= ColumnHeight;// footer line
+
+
+            float top_offset = freeHeigh / 2;
+
+            foreach (var generatedSlideZone in CurrentSlide.GeneratedSlideZones)
+            {
+                if (!_SlideZoneStructureBLO.IsTitle(generatedSlideZone))
+                    generatedSlideZone.Top += top_offset;
+            }
 
 
         }

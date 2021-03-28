@@ -18,6 +18,7 @@ namespace PowerPointLibrary.Entities
             Empty,
             ChangeLayout,
             ChangeZone,
+            NewZone,
             NewSlide,
             Note,
             EndNote,

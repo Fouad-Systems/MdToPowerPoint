@@ -32,6 +32,7 @@ namespace PowerPointLibrary.BLO
                 comment.StartsWith("<!-- note -->", true, null) ||
                 comment.StartsWith("<!-- end note -->", true, null) ||
                 comment.StartsWith("<!-- new slide", true, null) ||
+                comment.StartsWith("<!-- new zone", true, null) ||
                 comment.StartsWith("<!-- g layout :", true, null)
                 )
                 return true;
@@ -63,10 +64,27 @@ namespace PowerPointLibrary.BLO
             }
             if (comment.StartsWith("<!-- new slide", true, null))
             {
+                if(comment.StartsWith("<!-- new slide -->", true, null))
+                {
+                    commentAction = new CommentAction(comment);
+                    commentAction.ActionType = CommentAction.ActionTypes.NewSlide;
+                    string Layout = "Titre contenu";
+                    commentAction.Layout = Layout;
+                }
+                else
+                {
+                    commentAction = new CommentAction(comment);
+                    commentAction.ActionType = CommentAction.ActionTypes.NewSlide;
+                    string Layout = comment.Replace("<!-- new slide :", "").Replace("-->", "").Trim();
+                    commentAction.Layout = Layout;
+                }
+              
+            }
+            if (comment.StartsWith("<!-- new zone", true, null))
+            {
                 commentAction = new CommentAction(comment);
-                commentAction.ActionType = CommentAction.ActionTypes.NewSlide;
-                string Layout = comment.Replace("<!-- new slide :", "").Replace("-->", "").Trim();
-                commentAction.Layout = Layout;
+                commentAction.ActionType = CommentAction.ActionTypes.NewZone;
+                commentAction.Layout = null; // next zone
             }
             if (comment.StartsWith("<!-- note -->", true, null))
             {

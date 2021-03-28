@@ -17,9 +17,9 @@ namespace PowerPointLibrary.Entities
     {
         public int TitleLines { get; set; }
 
-
         public List<Row> Rows { get; set; }
 
+        public int Padding { set; get; } 
 
         public class Row
         {
@@ -44,6 +44,12 @@ namespace PowerPointLibrary.Entities
             }
 
          
+        }
+
+        public GLayoutStructure()
+        {
+            this.Padding = 30;
+            this.TitleLines = 2;
         }
 
     }

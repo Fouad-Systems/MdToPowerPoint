@@ -116,7 +116,8 @@ namespace PowerPointLibrary.BLO
                     int Length = SlideZone.Text.Text.Count() - Start;
 
                     TextElementStyle textElement = new TextElementStyle(Start, Length);
-                    textElement.IsBlod = true;
+                    textElement.IsBullet = true;
+                    
                     textElement.Start = Start;
                     textElement.ListStyle = listBlock.Style;
 
@@ -133,6 +134,8 @@ namespace PowerPointLibrary.BLO
 
 
         }
+
+      
 
         protected void AddInLindesToSlideZone(SlideZoneStructure SlideZone, IList<MarkdownInline> MarkdownInlines)
         {
@@ -216,7 +219,14 @@ namespace PowerPointLibrary.BLO
             }
         }
 
-
-
+        public bool IsTitle(SlideZoneStructure slideZoneStructure)
+        {
+            if (
+                slideZoneStructure.ContentTypes.Contains(Entities.Enums.ContentTypes.Title) ||
+                slideZoneStructure.Name == "Title" || 
+                slideZoneStructure.Name == "Titre")
+                return true;
+            return false;
+        }
     }
 }

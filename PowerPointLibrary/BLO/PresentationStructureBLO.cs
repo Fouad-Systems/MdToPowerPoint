@@ -12,21 +12,20 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
-
-
-
+    /// <summary>
+    /// Create presentationStructure from Markdown structure
+    /// </summary>
     public class PresentationStructureBLO
     {
-        PresentationStructure _PresentationStructure;
 
+        private PresentationStructure _PresentationStructure;
 
-
-        private readonly PresentationStructureBLO _PresentationStructureBLO;
+        //private PresentationStructureBLO _PresentationStructureBLO;
         private TemplateStructureBLO _TemplateStructureBLO;
-        private readonly TextStructureBLO _TextStructureBLO;
-        private readonly CommentActionBLO _CommentActionBLO;
-        private readonly SlideBLO _SlideBLO;
-        private readonly SlideZoneStructureBLO _SlideZoneStructureBLO;
+        private TextStructureBLO _TextStructureBLO;
+        private CommentActionBLO _CommentActionBLO;
+        private SlideBLO _SlideBLO;
+        private SlideZoneStructureBLO _SlideZoneStructureBLO;
         private GLayoutStructureBLO _GLayoutStructureBLO;
 
 
@@ -43,79 +42,14 @@ namespace PowerPointLibrary.BLO
             _GLayoutStructureBLO = new GLayoutStructureBLO();
         }
 
-        public static void CreateTemplateStructureExemple()
-        {
-
-            PresentationStructure templateStructure = new PresentationStructure();
-
-            SlideStructure slide1 = new SlideStructure();
-            slide1.Name = "Slide 1";
-            slide1.Order = 1;
-            slide1.SlideZones.Add(new SlideZoneStructure() { Name = "zone1" });
-            slide1.SlideZones.Add(new SlideZoneStructure() { Name = "zone2" });
-            //slide1.ContentTypes.Add(Entities.Enums.ContentTypes.Title);
-            //slide1.ContentTypes.Add(Entities.Enums.ContentTypes.Text);
-
-
-            SlideStructure slide2 = new SlideStructure();
-            slide2.Name = "Slide 2";
-            slide2.Order = 1;
-            slide2.SlideZones.Add(new SlideZoneStructure() { Name = "zone1" });
-            slide2.SlideZones.Add(new SlideZoneStructure() { Name = "zone2" });
-            slide2.SlideZones.Add(new SlideZoneStructure() { Name = "zone3" });
-
-            templateStructure.Slides.Add(slide1);
-            templateStructure.Slides.Add(slide2);
-
-            File.WriteAllText(@"exemple-template.json", JsonConvert.SerializeObject(templateStructure));
-
-            
-        }
-
-        public PresentationStructure LoadConfiguration(string templateName)
-        {
-           
-
-            string code = File.ReadAllText(templateName);
-
-            var obj = JsonConvert.DeserializeObject(code, typeof(PresentationStructure));
-            PresentationStructure templateStructure = obj as PresentationStructure;
-
-            // Calculate Zone Order 
-
-            foreach (var slide in templateStructure.Slides)
-            {
-                int order = 1;
-                foreach (var slideZone in slide.SlideZones)
-                {
-                    slideZone.Order = order++ ;
-                }
-
-            }
-
-            return templateStructure;
-        }
-
-
-        public SlideStructure CurrentSlide
-        {
-            get
-            {
-                return this._PresentationStructure.CurrentSlide;
-            }
-        }
 
         public void CreatePresentationDataStructure(MarkdownDocument mdDocument)
         {
-
+            // Amélioration
             // il faut d'abord, trouver le nombre des slides avec le nombre de type de contenue dans 
             // chaque slide
-
             // ensuite choisir la layout convenable pour chaque contenue 
-
             // ensuite read data frm mdDocument o PresentationDataStrucure
-
-
 
             foreach (var element in mdDocument.Blocks)
             {
@@ -149,7 +83,6 @@ namespace PowerPointLibrary.BLO
 
 
                 }
-
 
                 if (this.CurrentSlide.UseSlideOrder != 0) continue;
 
@@ -195,8 +128,12 @@ namespace PowerPointLibrary.BLO
                     }
                     else
                     {
-                        _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, List);
-                        this.CurrentSlide.CurrentZone.Text.Text += "\r";
+                        _SlideBLO.WriteToTextZone();
+                        if (this.CurrentSlide.CurrentZone != null) {
+                            _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.CurrentZone, List);
+                            this.CurrentSlide.CurrentZone.Text.Text += "\r";
+                        }
+                           
                     }
 
                 }
@@ -209,7 +146,6 @@ namespace PowerPointLibrary.BLO
                 {
 
                 }
-
 
                 if (element is ParagraphBlock Paragraph)
                 {
@@ -236,7 +172,7 @@ namespace PowerPointLibrary.BLO
                                     .ChangeCurrentZone(this.CurrentSlide, commentAction.ZoneName);
                                 break;
                             case CommentAction.ActionTypes.NewSlide:
-                                _SlideBLO.AddSlide(commentAction.Layout);
+                                _SlideBLO.NewSlide(commentAction.Layout);
                                 break;
 
                             case CommentAction.ActionTypes.Note:
@@ -252,6 +188,10 @@ namespace PowerPointLibrary.BLO
                                 break;
                             case CommentAction.ActionTypes.GenerateLayout:
                                 _GLayoutStructureBLO.GenerateSlideZone(this.CurrentSlide, commentAction.GLayoutStructure);
+                                break;
+                            case CommentAction.ActionTypes.NewZone:
+                                _SlideBLO
+                                   .NewZone(this.CurrentSlide);
                                 break;
                         }
                     }
@@ -302,10 +242,71 @@ namespace PowerPointLibrary.BLO
 
 
                 }
-
             }
         }
 
+
+        public static void CreateTemplateStructureExemple()
+        {
+
+            PresentationStructure templateStructure = new PresentationStructure();
+
+            SlideStructure slide1 = new SlideStructure();
+            slide1.Name = "Slide 1";
+            slide1.Order = 1;
+            slide1.SlideZones.Add(new SlideZoneStructure() { Name = "zone1" });
+            slide1.SlideZones.Add(new SlideZoneStructure() { Name = "zone2" });
+            //slide1.ContentTypes.Add(Entities.Enums.ContentTypes.Title);
+            //slide1.ContentTypes.Add(Entities.Enums.ContentTypes.Text);
+
+
+            SlideStructure slide2 = new SlideStructure();
+            slide2.Name = "Slide 2";
+            slide2.Order = 1;
+            slide2.SlideZones.Add(new SlideZoneStructure() { Name = "zone1" });
+            slide2.SlideZones.Add(new SlideZoneStructure() { Name = "zone2" });
+            slide2.SlideZones.Add(new SlideZoneStructure() { Name = "zone3" });
+
+            templateStructure.Slides.Add(slide1);
+            templateStructure.Slides.Add(slide2);
+
+            File.WriteAllText(@"exemple-template.json", JsonConvert.SerializeObject(templateStructure));
+
+
+        }
+
+        public PresentationStructure LoadConfiguration(string templateName)
+        {
+
+
+            string code = File.ReadAllText(templateName);
+
+            var obj = JsonConvert.DeserializeObject(code, typeof(PresentationStructure));
+            PresentationStructure templateStructure = obj as PresentationStructure;
+
+            // Calculate Zone Order 
+
+            foreach (var slide in templateStructure.Slides)
+            {
+                int order = 1;
+                foreach (var slideZone in slide.SlideZones)
+                {
+                    slideZone.Order = order++;
+                }
+
+            }
+
+            return templateStructure;
+        }
+
+
+        public SlideStructure CurrentSlide
+        {
+            get
+            {
+                return this._PresentationStructure.CurrentSlide;
+            }
+        }
 
 
 

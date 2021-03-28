@@ -38,16 +38,16 @@ namespace PowerPointLibrary.Entities
 
 
         // Postion in layout
-        public int Width { get; internal set; }
+        public float Width { get; internal set; }
 
         // Postion in layout
-        public int Height { get; internal set; }
+        public float Height { get; internal set; }
 
         // Postion in layout
-        public int Top { get; internal set; }
+        public float Top { get; internal set; }
 
         // Postion in layout
-        public int Left { get; internal set; }
+        public float Left { get; internal set; }
         public int Row { get; internal set; }
 
         public SlideZoneStructure()
@@ -56,10 +56,8 @@ namespace PowerPointLibrary.Entities
         }
 
 
-
-        public object Clone()
+        public void Clone(SlideZoneStructure clone)
         {
-            SlideZoneStructure clone = new SlideZoneStructure();
             clone.Name = Name;
             clone.Order = Order;
             clone.Width = Width;
@@ -75,6 +73,11 @@ namespace PowerPointLibrary.Entities
                 clone.Images = Images.Select(m => m.Clone() as ImageStructure).ToList();
 
             clone.ContentTypes = ContentTypes.Select(o => o).ToList(); ;
+        }
+        public object Clone()
+        {
+            SlideZoneStructure clone = new SlideZoneStructure();
+            this.Clone(clone);
 
             return clone;
 
@@ -93,7 +96,7 @@ namespace PowerPointLibrary.Entities
 
         public bool IsImage()
         {
-            if (this.Images != null && this.Images.Count() > 1)
+            if (this.Images != null && this.Images.Count() >= 1)
                 return true;
             else
                 return false;
@@ -107,6 +110,8 @@ namespace PowerPointLibrary.Entities
                 return false;
           
         }
+
+      
 
         // public ImageStructure { get; set; }
     }

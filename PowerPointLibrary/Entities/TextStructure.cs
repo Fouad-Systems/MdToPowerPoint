@@ -16,6 +16,9 @@ namespace PowerPointLibrary.Entities
         public bool IsBlod { get; set; }
         public bool IsItalic { get; set; }
         public bool IsBullet { get; set; }
+
+   
+
         public string FontColor { get; set; }
 
         public int Start;
