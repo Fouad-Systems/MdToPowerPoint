@@ -174,7 +174,7 @@ namespace PowerPointLibrary.BLO
             // Find the shape 
             Microsoft.Office.Interop.PowerPoint.Shape contenu_shape = currentSlide.Shapes["contenu"];
 
- 
+          
 
             // Create a shape for each SlideZone
             foreach (var SlideZone in slide.GeneratedSlideZones)
@@ -210,8 +210,12 @@ namespace PowerPointLibrary.BLO
                             ImageDimension.Width,
                             ImageDimension.Height);
 
+                       
+
+
                         // Create annimation
                         image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+   
                     }
 
                     continue;
@@ -235,7 +239,7 @@ namespace PowerPointLibrary.BLO
                     if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
                     {
                         shape.AnimationSettings.Animate = MsoTriState.msoCTrue;
-
+                        shape.AnimationSettings.TextLevelEffect = PpTextLevelEffect.ppAnimateByFifthLevel;
 
                         shape.AnimationSettings.TextUnitEffect = PpTextUnitEffect.ppAnimateByParagraph;
                       //  shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
@@ -251,6 +255,14 @@ namespace PowerPointLibrary.BLO
 
             // hide the shape "contnue", you mustn't delete it.
             contenu_shape.TextFrame.TextRange.Text = " ";
+
+
+            // Set annimation time = 0 
+
+            for (int i = 1; i <= currentSlide.TimeLine.MainSequence.Count; i++)
+            {
+                currentSlide.TimeLine.MainSequence[i].Timing.Duration = 0;
+            }
         }
 
         private SlideZoneStructure CenterImageInShape(SlideZoneStructure slideZone, float ratio, string imageFilePath)
