@@ -38,20 +38,19 @@ namespace PowerPointLibrary.BLO
         private readonly ShapesManager _ShapeManager;
         private readonly TextRangeManager _TextRangeManager;
 
-        private readonly PresentationStructureBLO _PresentationStructureBLO;
-        private TemplateStructureBLO _TemplateStructureBLO;
-        private readonly TextStructureBLO _TextStructureBLO;
+        private PresentationStructureBLO _PresentationStructureBLO;
+        private TemplateBLO _TemplateStructureBLO;
         private readonly CommentActionBLO _CommentActionBLO;
         private readonly SlideBLO _SlideBLO;
-        private readonly SlideZoneStructureBLO _SlideZoneStructureBLO;
-        private GLayoutStructureBLO _GLayoutStructureBLO;
+        private readonly SlideZoneBLO _SlideZoneStructureBLO;
+        private LayoutGeneratorBLO _GLayoutStructureBLO;
 
         GeneratePresentationBLO _GeneratePresentationBLO;
 
-        public PplArguments pplArguments;
+        public TopptArguments pplArguments;
         #endregion
 
-        public PresentationBLO(PplArguments pplArguments)
+        public PresentationBLO(TopptArguments pplArguments)
         {
             this.pplArguments = pplArguments;
 
@@ -67,15 +66,14 @@ namespace PowerPointLibrary.BLO
 
             _Application = _ApplicationManager.CreatePowerPointApplication();
             _PresentationStructure = new PresentationStructure();
-            _GLayoutStructureBLO = new GLayoutStructureBLO();
+            _GLayoutStructureBLO = new LayoutGeneratorBLO();
 
             // Init BLO
             _PresentationStructureBLO = new PresentationStructureBLO(this._PresentationStructure);
-            _TextStructureBLO = new TextStructureBLO();
             _CommentActionBLO = new CommentActionBLO();
             _SlideBLO = new SlideBLO(_PresentationStructure);
-            _SlideZoneStructureBLO = new SlideZoneStructureBLO();
-            _TemplateStructureBLO = new TemplateStructureBLO(_PresentationStructure);
+            _SlideZoneStructureBLO = new SlideZoneBLO();
+            _TemplateStructureBLO = new TemplateBLO(_PresentationStructure);
 
           
         }
@@ -125,7 +123,7 @@ namespace PowerPointLibrary.BLO
                     this.pplArguments.TemplatePath);
 
 
-            this._PresentationStructure._TemplateStructure = _PresentationStructureBLO.LoadConfiguration(this.pplArguments.TemplateConfigurationPath);
+            this._PresentationStructure._TemplateStructure = _TemplateStructureBLO.LoadConfiguration(this.pplArguments.TemplateConfigurationPath);
 
         }
 

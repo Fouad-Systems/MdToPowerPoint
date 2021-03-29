@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.Entities
 {
-    public class PplArguments
+    public class TopptArguments
     {
         public string CurrentDirectoryPath { get; set; }
 

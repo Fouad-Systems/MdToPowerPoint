@@ -25,6 +25,7 @@ namespace PowerPointLibrary.BLO
             // <!-- new slide -->
             // <!-- use : slide 1 --> : use Slide 1 that exist in the file : OutputfileName.slides.pptx
             // <!-- g layout : t 6-3 6-9 --> : Geneate layout, t: titre, 6-3 ligne 1, 6-9 ligne 2
+            // <!-- new zone -->
 
             if (
                 comment.StartsWith("<!-- layout :", true, null) ||
@@ -113,7 +114,7 @@ namespace PowerPointLibrary.BLO
                 commentAction = new CommentAction(comment);
                 commentAction.ActionType = CommentAction.ActionTypes.GenerateLayout;
                 string layout = comment.Replace("<!-- g layout :", "").Replace("-->", "").Trim();
-                commentAction.GLayoutStructure = new GLayoutStructureBLO().Parse(layout);
+                commentAction.GLayoutStructure = new LayoutGeneratorBLO().Parse(layout);
             }
 
 

@@ -50,6 +50,7 @@ namespace PowerPointLibrary.Manager
                             textRangePart.ParagraphFormat.Bullet.Type = PpBulletType.ppBulletUnnumbered;
                             textRangePart.ParagraphFormat.Bullet.Character = 9632;
 
+
                             textRangePart.ParagraphFormat.Bullet.Visible = Microsoft.Office.Core.MsoTriState.msoCTrue;
                             break;
                         case Microsoft.Toolkit.Parsers.Markdown.ListStyle.Numbered:

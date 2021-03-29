@@ -11,7 +11,7 @@ namespace PowerPointLibrary.BLO
     /// <summary>
     /// Generate SlideZone 
     /// </summary>
-    public class GLayoutStructureBLO
+    public class LayoutGeneratorBLO
     {
 
         public GLayoutStructure Parse(string layout)
@@ -133,7 +133,7 @@ namespace PowerPointLibrary.BLO
         /// <param name="gLayoutStructure"></param>
         public void GenerateSlideZone(SlideStructure CurrentSlide, GLayoutStructure gLayoutStructure)
         {
-            SlideZoneStructureBLO _SlideZoneStructureBLO = new SlideZoneStructureBLO();
+            SlideZoneBLO _SlideZoneStructureBLO = new SlideZoneBLO();
             float currentTop = 0;
             float currentLeft = 0;
             CurrentSlide.IsGenerated = true;
@@ -216,7 +216,7 @@ namespace PowerPointLibrary.BLO
             }
 
             // Copy TitleZone
-            var TitleZone = CurrentSlide.CurrentZone;
+            var TitleZone =  SlideBLO.GetTitleZoneFromSlideZones(CurrentSlide);
 
             if ( _SlideZoneStructureBLO.IsTitle(TitleZone))
             {

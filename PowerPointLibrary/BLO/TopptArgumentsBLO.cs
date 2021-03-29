@@ -9,16 +9,20 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
-    public class PplArgumentsBLO
+
+    /// <summary>
+    /// Convert args string to PplArgument
+    /// </summary>
+    public class TopptArgumentsBLO
     {
         /// <summary>
         /// Read arguments from main params
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public PplArguments Read(string[] args)
+        public TopptArguments Read(string[] args)
         {
-            PplArguments pplArguments = new PplArguments();
+            TopptArguments pplArguments = new TopptArguments();
 
             // CurrentDirectoryPath
             pplArguments.CurrentDirectoryPath = Environment.CurrentDirectory;

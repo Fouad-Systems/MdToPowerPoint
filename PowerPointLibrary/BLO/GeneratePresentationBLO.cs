@@ -31,7 +31,7 @@ namespace PowerPointLibrary.BLO
         public Microsoft.Office.Interop.PowerPoint.Application _Application;
         public  PresentationStructure _PresentationStructure;
         public  Presentation _Presentation;
-        public  PplArguments pplArguments;
+        public  TopptArguments pplArguments;
 
         private PowerPointApplicationManager _ApplicationManager;
         private PresentationManager _PresentationManager;
@@ -40,12 +40,11 @@ namespace PowerPointLibrary.BLO
         private TextRangeManager _TextRangeManager;
 
         private PresentationStructureBLO _PresentationStructureBLO;
-        private TemplateStructureBLO _TemplateStructureBLO;
-        private TextStructureBLO _TextStructureBLO;
+        private TemplateBLO _TemplateStructureBLO;
         private CommentActionBLO _CommentActionBLO;
         private SlideBLO _SlideBLO;
-        private SlideZoneStructureBLO _SlideZoneStructureBLO;
-        private GLayoutStructureBLO _GLayoutStructureBLO;
+        private SlideZoneBLO _SlideZoneStructureBLO;
+        private LayoutGeneratorBLO _GLayoutStructureBLO;
 
         #endregion
 
@@ -53,7 +52,7 @@ namespace PowerPointLibrary.BLO
             Microsoft.Office.Interop.PowerPoint.Application _Application,
             Presentation _Presentation,
             PresentationStructure _PresentationStructure, 
-            PplArguments pplArguments)
+            TopptArguments pplArguments)
         {
             this._Application = _Application;
             this._Presentation = _Presentation;
@@ -71,11 +70,10 @@ namespace PowerPointLibrary.BLO
 
             // Init BLO
             _PresentationStructureBLO = new PresentationStructureBLO(this._PresentationStructure);
-            _TextStructureBLO = new TextStructureBLO();
             _CommentActionBLO = new CommentActionBLO();
             _SlideBLO = new SlideBLO(_PresentationStructure);
-            _SlideZoneStructureBLO = new SlideZoneStructureBLO();
-            _TemplateStructureBLO = new TemplateStructureBLO(_PresentationStructure);
+            _SlideZoneStructureBLO = new SlideZoneBLO();
+            _TemplateStructureBLO = new TemplateBLO(_PresentationStructure);
         }
 
 
@@ -192,6 +190,34 @@ namespace PowerPointLibrary.BLO
                     continue;
                 }
 
+                // Insert image in current zone
+                if (SlideZone.Images != null && SlideZone.Images.Count > 0)
+                {
+
+                    foreach (var image in SlideZone.Images)
+                    {
+                        string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
+
+                        // Center the image in the shape : calculate the new dimension
+                        SlideZoneStructure ImageDimension = this.CenterImageInShape(SlideZone, ratio, imageFilePath);
+
+                        // Insert image 
+                        Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
+                            .AddPicture(currentSlide,
+                            imageFilePath,
+                            ImageDimension.Left,
+                            ImageDimension.Top,
+                            ImageDimension.Width,
+                            ImageDimension.Height);
+
+                        // Create annimation
+                        image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                    }
+
+                    continue;
+                }
+
+
                 // Add text to current zone
                 if (SlideZone.Text != null && !string.IsNullOrEmpty(SlideZone.Text.Text))
                 {
@@ -208,35 +234,18 @@ namespace PowerPointLibrary.BLO
                     // Create annimation  
                     if (!SlideZone.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
                     {
-                        shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                        shape.AnimationSettings.Animate = MsoTriState.msoCTrue;
+
+
+                        shape.AnimationSettings.TextUnitEffect = PpTextUnitEffect.ppAnimateByParagraph;
+                      //  shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
+                  
+
                     }
 
                 }
 
-                // Insert image in current zone
-                if (SlideZone.Images != null && SlideZone.Images.Count > 0)
-                {
-
-                    foreach (var image in SlideZone.Images)
-                    {
-                        string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
-
-                        // Center the image in the shape : calculate the new dimension
-                        SlideZoneStructure ImageDimension = this.CenterImageInShape(SlideZone, ratio, imageFilePath);
-                       
-                        // Insert image 
-                        Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
-                            .AddPicture(currentSlide, 
-                            imageFilePath, 
-                            ImageDimension.Left,
-                            ImageDimension.Top,
-                            ImageDimension.Width,
-                            ImageDimension.Height);
-
-                        // Create annimation
-                        image_shape.AnimationSettings.EntryEffect = PpEntryEffect.ppEffectAppear;
-                    }
-                }
+               
 
             }
 

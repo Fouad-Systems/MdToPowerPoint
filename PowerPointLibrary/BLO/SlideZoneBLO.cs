@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
-    public class SlideZoneStructureBLO
+    public class SlideZoneBLO
     {
 
         public void AddMarkdownBlockToSlideZone(SlideZoneStructure SlideZone, MarkdownBlock markdownBlock)
@@ -71,7 +71,7 @@ namespace PowerPointLibrary.BLO
         private void AddCodeToSlideZone(SlideZoneStructure SlideZone, CodeBlock codeBlock)
         {
 
-            var DefaulStyle = new CodeBLO().GetDefaultCodeStyle();
+            var DefaulStyle = new CodeStyleBLO().GetDefaultCodeStyle();
  
             // codeBlock.Text
             var code = codeBlock.Text;
@@ -82,9 +82,6 @@ namespace PowerPointLibrary.BLO
  
 
         }
-
-     
- 
 
         private void TrimFirstInlines(HeaderBlock headerBlock)
         {
@@ -107,6 +104,7 @@ namespace PowerPointLibrary.BLO
 
         private void AddListBlockToTextStructure(SlideZoneStructure SlideZone, ListBlock listBlock)
         {
+            if (SlideZone.Text == null) SlideZone.Text = new TextStructure();
             for (int i = 0; i < listBlock.Items.Count; i++)
             {
                 foreach (MarkdownBlock markdownBlock in listBlock.Items[i].Blocks)
@@ -129,13 +127,11 @@ namespace PowerPointLibrary.BLO
 
                 // ne pas ajouter le retour à la ligne pour  le dernier élément.
                 if (i < listBlock.Items.Count - 1)
-                    SlideZone.Text.Text += "\n";
+                    SlideZone.Text.Text += "\r";
             }
 
 
         }
-
-      
 
         protected void AddInLindesToSlideZone(SlideZoneStructure SlideZone, IList<MarkdownInline> MarkdownInlines)
         {

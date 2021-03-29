@@ -1,5 +1,6 @@
 ﻿using Microsoft.Toolkit.Parsers.Markdown.Blocks;
 using PowerPointLibrary.Entities;
+using PowerPointLibrary.Entities.Enums;
 using PowerPointLibrary.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -12,16 +13,16 @@ namespace PowerPointLibrary.BLO
     public class SlideBLO
     {
         public static string ZoneTitleName = "Titre";
-  
-        SlideZoneStructureBLO _SlideZoneStructureBLO;
-        TemplateStructureBLO _TemplateStructureBLO;
-        PresentationStructure  _PresentationStructure;
-
+        private SlideZoneBLO _SlideZoneStructureBLO;
+        private TemplateBLO _TemplateStructureBLO;
+        private PresentationStructure _PresentationStructure;
+        private LayoutGeneratorBLO _LayoutGeneratorBLO;
         public SlideBLO(PresentationStructure _PresentationStructure)
         {
             this._PresentationStructure = _PresentationStructure;
-            _SlideZoneStructureBLO = new SlideZoneStructureBLO();
-            _TemplateStructureBLO = new TemplateStructureBLO(_PresentationStructure);
+            _SlideZoneStructureBLO = new SlideZoneBLO();
+            _TemplateStructureBLO = new TemplateBLO(_PresentationStructure);
+            _LayoutGeneratorBLO = new LayoutGeneratorBLO();
         }
 
         public SlideStructure CurrentSlide
@@ -29,6 +30,77 @@ namespace PowerPointLibrary.BLO
             get
             {
                 return _PresentationStructure.CurrentSlide;
+            }
+        }
+
+        #region FindZone
+
+        public static SlideZoneStructure GetTitleZone(SlideStructure slideStructure)
+        {
+            if (slideStructure.IsGenerated)
+            {
+                return slideStructure.GeneratedSlideZones.Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                     .FirstOrDefault();
+            }
+
+            return slideStructure.SlideZones.Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                   .FirstOrDefault();
+
+        }
+
+        public static SlideZoneStructure GetTitleZoneFromSlideZones(SlideStructure slideStructure)
+        {
+
+            return slideStructure.SlideZones.Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
+                   .FirstOrDefault();
+
+        }
+
+        #endregion
+
+        #region Apply CommentAction
+
+        public CommentAction ApplyAction(string comment)
+        {
+            CommentActionBLO commentActionBLO = new CommentActionBLO();
+            CommentAction commentAction = commentActionBLO.ParseComment(comment);
+            this.ApplyAction(commentAction);
+            return commentAction;
+        }
+
+        public void ApplyAction(CommentAction commentAction)
+        {
+            switch (commentAction.ActionType)
+            {
+                case CommentAction.ActionTypes.ChangeLayout:
+
+                    this.CurrentSlide.IsLayoutChangedByAction = true;
+                    this.ChangeLayout(this.CurrentSlide, commentAction.Layout);
+                    break;
+                case CommentAction.ActionTypes.ChangeZone:
+                    this.ChangeCurrentZone(this.CurrentSlide, commentAction.ZoneName);
+                    break;
+                case CommentAction.ActionTypes.NewSlide:
+                    this.NewSlide(commentAction.Layout);
+                    break;
+                case CommentAction.ActionTypes.Note:
+                    this.StartWriteToNote();
+                    break;
+                case CommentAction.ActionTypes.EndNote:
+                    this.EndWriteToNote();
+                    break;
+                case CommentAction.ActionTypes.Empty:
+                    break;
+                case CommentAction.ActionTypes.UseSlide:
+                    this.UseSlide(commentAction);
+                    break;
+                case CommentAction.ActionTypes.GenerateLayout:
+                    _LayoutGeneratorBLO.GenerateSlideZone(this.CurrentSlide, commentAction.GLayoutStructure);
+                    break;
+                case CommentAction.ActionTypes.NewZone:
+                    this
+                       .NewZone(this.CurrentSlide);
+                    break;
             }
         }
 
@@ -125,12 +197,12 @@ namespace PowerPointLibrary.BLO
 
         public void NewSlide(string Layout)
         {
-            var TitleZone = this.GetTitleZone(this.CurrentSlide);
+            var TitleZone = GetTitleZone(this.CurrentSlide);
 
         
             this.AddSlide(Layout);
 
-            var CurrentTitleZone = this.GetTitleZone(this.CurrentSlide);
+            var CurrentTitleZone = GetTitleZone(this.CurrentSlide);
             TitleZone.Clone(CurrentTitleZone);
 
           
@@ -140,20 +212,15 @@ namespace PowerPointLibrary.BLO
 
         }
 
-        private SlideZoneStructure GetTitleZone(SlideStructure slideStructure)
+        public void UseSlide(CommentAction commentAction)
         {
-            if (slideStructure.IsGenerated)
-            {
-               return slideStructure.GeneratedSlideZones.Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
-                    .FirstOrDefault();
-            }
-
-            return slideStructure.SlideZones.Where(z => z.ContentTypes.Contains(Entities.Enums.ContentTypes.Title))
-                   .FirstOrDefault();
-
+            this.CurrentSlide.UseSlideOrder = commentAction.UseSlideOrder;
         }
 
-        public void WriteToTitleZone()
+        #endregion
+
+        #region FindZone
+        public void FindZoneForTitle()
         {
             int CurrentZoneOrder = 0;
             if (this.CurrentSlide.CurrentZone != null) CurrentZoneOrder = this.CurrentSlide.CurrentZone.Order;
@@ -164,8 +231,7 @@ namespace PowerPointLibrary.BLO
                 .FirstOrDefault();
         }
 
-
-        public void WriteToTextZone()
+        public void FindZoneForTexte()
         {
             // Change if we are in zone title or image zone
 
@@ -215,7 +281,7 @@ namespace PowerPointLibrary.BLO
 
         }
 
-        public void WriteToImageZone()
+        public void FindZoneForImage()
         {
           
 
@@ -281,6 +347,11 @@ namespace PowerPointLibrary.BLO
 
         }
 
+       
+
+        #endregion
+
+        #region Add Note
         public void StartWriteToNote()
         {
             CurrentSlide.AddToNotes = true;
@@ -291,38 +362,40 @@ namespace PowerPointLibrary.BLO
             CurrentSlide.AddToNotes = false;
         }
 
-        public void UseSlide(CommentAction commentAction)
-        {
-            this.CurrentSlide.UseSlideOrder = commentAction.UseSlideOrder;
-        }
-
-        public void AddNotes(MarkdownBlock paragraph)
+        /// <summary>
+        /// Add paragraphe to Note zone
+        /// </summary>
+        /// <param name="paragraph"></param>
+        public void AddNotes(MarkdownBlock paragraph, int contentNumber)
         {
             if (this.CurrentSlide.Notes == null) this.CurrentSlide.Notes = new SlideZoneStructure();
             if (this.CurrentSlide.Notes.Text == null) this.CurrentSlide.Notes.Text = new TextStructure();
+
+            this.CurrentSlide.Notes.Text.Text += $"{contentNumber} |";
 
             _SlideZoneStructureBLO.AddMarkdownBlockToSlideZone(this.CurrentSlide.Notes, paragraph);
             this.CurrentSlide.Notes.Text.Text += "\r";
         }
 
+        public void AddExplicationNotes(MarkdownBlock markdownBlock, int contentNumber)
+        {
+            MarkdownBlockBLO markdownBlockBLO = new MarkdownBlockBLO();
 
+            if (this.CurrentSlide.Notes == null) this.CurrentSlide.Notes = new SlideZoneStructure();
+            if (this.CurrentSlide.Notes.Text == null) this.CurrentSlide.Notes.Text = new TextStructure();
 
-     
+            if(new MarkdownBlockBLO().IsImage(markdownBlock))
+                this.CurrentSlide.Notes.Text.Text += $"{contentNumber} | <--- [image] {markdownBlockBLO.GetImageInline(markdownBlock)?.Tooltip}...";
+            else
+            {
+                string expressString = (markdownBlock.ToString().Count() < 10)? markdownBlock.ToString() : markdownBlock.ToString().Substring(0, 10);
+                this.CurrentSlide.Notes.Text.Text += $"{contentNumber} | <--- {expressString}...";
+            }
+               
 
-        //public void CopySlideZoneToGeneratedSlideZone()
-        //{
-        //    // Add the created Zone to GeneratedSlideZones
-        //    foreach (var item in this.CurrentSlide.SlideZones)
-        //    {
-        //        if(item.Text != null && !string.IsNullOrEmpty(item.Text.Text))
-        //        {
+            this.CurrentSlide.Notes.Text.Text += "\r";
+        }
+        #endregion
 
-        //        }
-        //        if (_SlideZoneStructureBLO.IsHaveData(item))
-        //        {
-        //            this.CurrentSlide.GeneratedSlideZones.Add(item.Clone() as SlideZoneStructure);
-        //        }
-        //    }
-        //}
     }
 }

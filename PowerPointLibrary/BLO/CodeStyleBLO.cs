@@ -9,7 +9,10 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
-    public class CodeBLO
+    /// <summary>
+    /// CodeStyle Manager : for code highlight
+    /// </summary>
+    public class CodeStyleBLO
     {
 
         public const string Blue = "#aaa";

@@ -24,7 +24,7 @@ namespace MdToPowerPoint
 
           //  PresentationStructureBLO.CreateTemplateStructureExemple();
 
-            PplArguments pplArguments = new PplArgumentsBLO().Read(args);
+            TopptArguments pplArguments = new TopptArgumentsBLO().Read(args);
 
             //string MdDocumentFileName = "mdData.md";
             //// new TemplateStructureBLO().CreateTemplateStructureExemple();
@@ -59,7 +59,7 @@ namespace MdToPowerPoint
 
         }
 
-        private static void CreatePresenytation(PplArguments pplArguments)
+        private static void CreatePresenytation(TopptArguments pplArguments)
         {
 
 
