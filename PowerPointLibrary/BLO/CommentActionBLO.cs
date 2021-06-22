@@ -33,6 +33,7 @@ namespace PowerPointLibrary.BLO
                 comment.StartsWith("<!-- note -->", true, null) ||
                 comment.StartsWith("<!-- end note -->", true, null) ||
                 comment.StartsWith("<!-- new slide", true, null) ||
+                comment.StartsWith("<!-- use : slide", true, null) ||
                 comment.StartsWith("<!-- new zone", true, null) ||
                 comment.StartsWith("<!-- g layout :", true, null)
                 )

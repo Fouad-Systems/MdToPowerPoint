@@ -9,6 +9,7 @@
 
     using PPT = Microsoft.Office.Interop.PowerPoint;
     using OFFICE = Microsoft.Office.Core;
+    using System.Drawing;
 
     public class ShapesManager : IShapesManager
     {
@@ -52,6 +53,13 @@
                     topPosition,
                     width,
                     height);
+
+           // shapeOut.Line.Weight = 1;
+           // shapeOut.Line.ForeColor.RGB = System.Drawing.ColorTranslator.ToOle(ColorTranslator.FromHtml("#aaa"));
+           //// shapeOut.Shadow.Type = OFFICE.MsoShadowType.msoShadow21;
+
+          
+
 
             return shapeOut;
         }
