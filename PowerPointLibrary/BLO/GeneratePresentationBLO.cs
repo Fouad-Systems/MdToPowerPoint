@@ -139,17 +139,19 @@ namespace PowerPointLibrary.BLO
 
                 if (SlideZone.Images != null && SlideZone.Images.Count > 0)
                 {
-                    //float shapeWidth = shape.Width;
-                    //float shapeHeight = shape.Height;
-                    //float shapeLeft = shape.Left;
-                    //float shapeTop = shape.Top;
+                    SlideZoneStructure shapeZone = new SlideZoneStructure();
+
+                    shapeZone.Width = shape.Width;
+                    shapeZone.Height = shape.Height;
+                    shapeZone.Left = shape.Left;
+                    shapeZone.Top = shape.Top;
 
                     foreach (var image in SlideZone.Images)
                     {
                         string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
 
                         // Center the image in the shape : calculate the new dimension
-                        SlideZoneStructure ImageDimension = this.CenterImageInShape(SlideZone, ratio, imageFilePath);
+                        SlideZoneStructure ImageDimension = this.CenterImageInShape(shapeZone, ratio, imageFilePath);
 
 
                         Microsoft.Office.Interop.PowerPoint.Shape image_shape = _ShapeManager
@@ -271,6 +273,8 @@ namespace PowerPointLibrary.BLO
             
             float imageHeight = 0;
             float imageWidth = 0;
+
+        
 
             float shapeWidth = slideZone.Width * ratio;
             float shapeHeight = slideZone.Height * ratio;

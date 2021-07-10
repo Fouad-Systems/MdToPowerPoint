@@ -22,28 +22,8 @@ namespace MdToPowerPoint
         static void Main(string[] args)
         {
 
-          //  PresentationStructureBLO.CreateTemplateStructureExemple();
-
-            TopptArguments pplArguments = new TopptArgumentsBLO().Read(args);
-
-            //string MdDocumentFileName = "mdData.md";
-            //// new TemplateStructureBLO().CreateTemplateStructureExemple();
-
-            //if (args != null && args.Length > 0)
-            //{
-            //    MdDocumentFileName = args[0];
-
-            //}
-
-            //string FilePath = Environment.CurrentDirectory + "\\" + MdDocumentFileName;
-            //if (!File.Exists(FilePath))
-            //{
-            //    string msg = $"The file ({FilePath}) doesn't exist";
-            //    throw new PplException(msg);
-            //}
-
-
-            CreatePresenytation(pplArguments);
+            TopptArguments topptArguments = new TopptArgumentsBLO().Read(args);
+            CreatePresenytation(topptArguments);
 
             // Clean up the unmanaged PowerPoint COM resources by forcing a  
             // garbage collection as soon as the calling function is off the  
@@ -59,11 +39,14 @@ namespace MdToPowerPoint
 
         }
 
+        /// <summary>
+        /// Create the presentation from md file
+        /// </summary>
+        /// <param name="pplArguments"></param>
         private static void CreatePresenytation(TopptArguments pplArguments)
         {
 
-
-            // Load MarkDown File
+            // Load MarkDown file
             StreamReader sr = new StreamReader(pplArguments.MdDocumentPath);
             string md = sr.ReadToEnd();
 
@@ -75,14 +58,11 @@ namespace MdToPowerPoint
 
             // Create presentation
             PresentationBLO presentationBLO = new PresentationBLO(pplArguments);
-            presentationBLO.Create();
+            presentationBLO.CreateNewPresentationFromTemplate();
+            presentationBLO.CreatePresentationFroMdDocument(mdDocument);
 
-            presentationBLO.CreatePresentation(mdDocument);
-
-            
-
-
-           // System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+           
+            // System.Diagnostics.Process.Start(Environment.CurrentDirectory);
             System.Diagnostics.Process.Start(pplArguments.OutPutFile);
 
         }

@@ -21,7 +21,7 @@ using System.Diagnostics;
 namespace PowerPointLibrary.BLO
 {
     /// <summary>
-    /// Create presentation
+    /// Create the presentation from md file
     /// </summary>
     public class PresentationBLO
     {
@@ -78,13 +78,22 @@ namespace PowerPointLibrary.BLO
           
         }
 
-        public void CreatePresentation(MarkdownDocument mdDocument)
+        /// <summary>
+        /// Create the presentation from MarkdownDocument
+        /// </summary>
+        /// <param name="mdDocument"></param>
+        public void CreatePresentationFroMdDocument(MarkdownDocument mdDocument)
         {
 
-            _PresentationStructureBLO.CreatePresentationDataStructure(mdDocument);
+            _PresentationStructureBLO
+                .CreatePresentationDataStructure(mdDocument);
 
-
-            _GeneratePresentationBLO = new GeneratePresentationBLO(_Application, _Presentation, _PresentationStructure, pplArguments);
+            _GeneratePresentationBLO = 
+                new GeneratePresentationBLO(
+                    _Application, 
+                    _Presentation, 
+                    _PresentationStructure, 
+                    pplArguments);
 
 
             _GeneratePresentationBLO.GeneratePresentation();
@@ -102,7 +111,7 @@ namespace PowerPointLibrary.BLO
         /// Create a new Presentation from template
         /// </summary>
         /// <param name="TemplateName"></param>
-        public void Create()
+        public void CreateNewPresentationFromTemplate()
         {
             //string CurrentDirectory = Environment.CurrentDirectory;
             //string PowerPointTemplateFileName = CurrentDirectory + "/" + TemplateName + ".pptx";

@@ -15,7 +15,7 @@ namespace PowerPointLibrary.BLO
     public class CodeStyleBLO
     {
 
-        public const string Blue = "#aaa";
+        public const string Blue = "#068dbd";
         public const string DarkCyan = "#FF008B8B";
         public const string DarkOliveGreen = "#FF556B2F";
         public const string OliveDrab = "#FF6B8E23";
@@ -58,7 +58,7 @@ namespace PowerPointLibrary.BLO
                     },
                     new Style(ScopeName.HtmlTagDelimiter)
                     {
-                        Foreground = Blue,
+                        Foreground = DullRed,
                         ReferenceName = "htmlTagDelimiter"
                     },
                     new Style(ScopeName.HtmlElementName)

@@ -42,6 +42,10 @@ namespace PowerPointLibrary.BLO
 
         }
 
+        /// <summary>
+        /// Crete the presentation data structure from mdDocument
+        /// </summary>
+        /// <param name="mdDocument"></param>
         public void CreatePresentationDataStructure(MarkdownDocument mdDocument)
         {
             // Amélioration

@@ -190,6 +190,14 @@ namespace PowerPointLibrary.BLO
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Subscript:
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Code:
+                        int Start_code = SlideZone.Text.Text.Count() + 1;
+                        Microsoft.Toolkit.Parsers.Markdown.Inlines.CodeInline codeInline = markdownInline as CodeInline;
+                        string text_code = codeInline.Text;
+                        int Length_code = text_code.Count();
+                        SlideZone.Text.Text += text_code;
+                        TextElementStyle TextElementStyleCode = new TextElementStyle(Start_code, Length_code);
+                        TextElementStyleCode.IsBlod = true;
+                        SlideZone.Text.TextElementStyles.Add(TextElementStyleCode);
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Image:
                         Microsoft.Toolkit.Parsers.Markdown.Inlines.ImageInline imageInline = markdownInline as ImageInline;

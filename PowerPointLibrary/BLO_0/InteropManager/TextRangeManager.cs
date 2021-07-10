@@ -36,8 +36,9 @@ namespace PowerPointLibrary.Manager
                    
                     textRangePart.Font.Bold = Microsoft.Office.Core.MsoTriState.msoCTrue;
                     var fromHTML = ColorTranslator.FromHtml(textElement.FontColor);
-                    // var fromHTML2 = ColorTranslator.ToHtml(fromHTML);
-                    var Color1 = ColorTranslator.FromHtml("#068dbd");
+                    var fromHTML2 = ColorTranslator.ToHtml(fromHTML);
+                    var Color1 = ColorTranslator.FromHtml(fromHTML2);
+                    // var Color1 = ColorTranslator.FromHtml("#068dbd");
                     textRangePart.Font.Color.RGB = System.Drawing.ColorTranslator.ToOle(Color1);
                     // textRangePart.Font.Color.RGB = Color.Red.ToArgb();
                 }
