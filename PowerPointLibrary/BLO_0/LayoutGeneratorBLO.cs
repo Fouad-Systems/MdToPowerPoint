@@ -199,19 +199,17 @@ namespace PowerPointLibrary.BLO
 
             }
 
-            // Center the second Zone 
-            int rowNumber = 1;
+            // Center All zone, else Title
+            
             foreach (var row in gLayoutStructure.Rows)
             {
-                var zones = CurrentSlide.GeneratedSlideZones.Where(z => z.Row == rowNumber).ToList();
-                rowNumber++;
-                if (zones.Count() == 1) continue;
-
+                var zones = CurrentSlide.GeneratedSlideZones.Where(z => z.Row != 1).ToList();
+       
                 float max_height = zones.Max(z => z.Height);
 
                 foreach (var zone in zones)
                 {
-                    zone.Top += (max_height - zone.Height) / 2;
+                    zone.Top += (max_height - zone.Height) / 3; // nombre d'or
                 }
             }
 
