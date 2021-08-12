@@ -43,7 +43,7 @@ namespace PowerPointLibrary.BLO
                     }
                     else
                     {
-                        gLayoutStructure.TitleLines = 1;
+                        gLayoutStructure.TitleLines = 2;
                     }
 
                     continue;
