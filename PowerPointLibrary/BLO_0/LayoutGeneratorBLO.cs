@@ -200,10 +200,11 @@ namespace PowerPointLibrary.BLO
             }
 
             // Center All zone, else Title
-            
+            int rowNumber = 2; // start after title
             foreach (var row in gLayoutStructure.Rows)
             {
-                var zones = CurrentSlide.GeneratedSlideZones.Where(z => z.Row != 1).ToList();
+                
+                var zones = CurrentSlide.GeneratedSlideZones.Where(z => z.Row == rowNumber).ToList();
        
                 float max_height = zones.Max(z => z.Height);
 
@@ -211,6 +212,7 @@ namespace PowerPointLibrary.BLO
                 {
                     zone.Top += (max_height - zone.Height) / 3; // nombre d'or
                 }
+                rowNumber++;
             }
 
             // Copy TitleZone
