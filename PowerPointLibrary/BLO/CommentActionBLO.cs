@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
+    /// <summary>
+    /// Parse Comment Action
+    /// </summary>
     public class CommentActionBLO
     {
         /// <summary>

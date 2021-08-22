@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
+    // Add Data to SlideZone
     public class SlideZoneBLO
     {
 
@@ -159,6 +160,7 @@ namespace PowerPointLibrary.BLO
                         SlideZone.Text.Text += text_blod;
                         TextElementStyle TextElementStyle = new TextElementStyle(Start, Length);
                         TextElementStyle.IsBlod = true;
+                       // TextElementStyle.FontColor = CodeStyleBLO.DarkCyan;
                         SlideZone.Text.TextElementStyles.Add(TextElementStyle);
                         break;
                     case Microsoft.Toolkit.Parsers.Markdown.MarkdownInlineType.Italic:

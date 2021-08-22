@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace PowerPointLibrary.BLO
 {
     /// <summary>
-    /// Generate SlideZone 
+    /// Parse layout comment and Generate SlideZone 
     /// </summary>
     public class LayoutGeneratorBLO
     {

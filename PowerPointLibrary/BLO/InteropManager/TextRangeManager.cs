@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.Manager
 {
+    // Add Texte to TexteRange
     public class TextRangeManager
     {
         public void AddTextStructure(TextRange textRange, TextStructure textStructure)
