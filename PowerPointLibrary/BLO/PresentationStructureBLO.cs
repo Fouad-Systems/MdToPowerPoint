@@ -57,6 +57,7 @@ namespace PowerPointLibrary.BLO
             int contentNumber = 0;
             foreach (var element in mdDocument.Blocks)
             {
+                if (element.Type == MarkdownBlockType.YamlHeader) continue;
                 // Create Slide if Header < 2
                 // if header and header < 2
                 if (element is HeaderBlock header)

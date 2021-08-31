@@ -48,6 +48,19 @@ namespace PowerPointLibrary.BLO
 
         #endregion
 
+        public string ImagePatheFile(string ImageURL)
+        {
+            // si le chemin de l'image est relative, 
+            // dans mon chaine de production dans Jekyll, je dépose les articles à l'intérieur d'un document
+            // dans la collection _Chapitres, pour corriger les chemins des images il faut ajoutert : "../"
+
+            if (ImageURL.StartsWith("../")) ImageURL = "../" + ImageURL;
+            if (ImageURL.StartsWith("./")) ImageURL = "../../" + ImageURL;
+
+            string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, ImageURL);
+            return imageFilePath;
+        }
+
         public GeneratePresentationBLO(
             Microsoft.Office.Interop.PowerPoint.Application _Application,
             Presentation _Presentation,
@@ -148,7 +161,7 @@ namespace PowerPointLibrary.BLO
 
                     foreach (var image in SlideZone.Images)
                     {
-                        string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
+                        string imageFilePath = this.ImagePatheFile(image.Url);
 
                         // Center the image in the shape : calculate the new dimension
                         SlideZoneStructure ImageDimension = this.CenterImageInShape(shapeZone, ratio, imageFilePath);
@@ -198,8 +211,11 @@ namespace PowerPointLibrary.BLO
 
                     foreach (var image in SlideZone.Images)
                     {
-                        string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, image.Url);
+                       
 
+                        string imageFilePath = this.ImagePatheFile( image.Url);
+
+                       
                         // Center the image in the shape : calculate the new dimension
                         SlideZoneStructure ImageDimension = this.CenterImageInShape(SlideZone, ratio, imageFilePath);
 
