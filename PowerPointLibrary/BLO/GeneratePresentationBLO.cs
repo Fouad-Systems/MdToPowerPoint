@@ -55,7 +55,11 @@ namespace PowerPointLibrary.BLO
             // dans la collection _Chapitres, pour corriger les chemins des images il faut ajoutert : "../"
 
             if (ImageURL.StartsWith("../")) ImageURL = "../" + ImageURL;
-            if (ImageURL.StartsWith("./")) ImageURL = "../../" + ImageURL;
+            else
+            {
+                ImageURL = "../../" + ImageURL;
+            }
+           
 
             string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, ImageURL);
             return imageFilePath;

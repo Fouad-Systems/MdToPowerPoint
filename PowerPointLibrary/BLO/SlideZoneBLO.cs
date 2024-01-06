@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.BLO
 {
-    // Add Data to SlideZone
+    // Add Data to SlideZone structure
     public class SlideZoneBLO
     {
 
@@ -75,8 +75,15 @@ namespace PowerPointLibrary.BLO
             var DefaulStyle = new CodeStyleBLO().GetDefaultCodeStyle();
  
             // codeBlock.Text
-            var code = codeBlock.Text;
+           // var code = codeBlock.Text;
+
+            // La propriété textRange.Text de PowerPoint remplate \r\n par \r
+            codeBlock.Text = codeBlock.Text.Replace("\r\n", "\r");
+
+
             var formatter = new TexteStructureCodeColorizer(SlideZone.Text, DefaulStyle);
+
+            SlideZone.Text.ParagraphAlignment = Microsoft.Office.Interop.PowerPoint.PpParagraphAlignment.ppAlignLeft;
 
 
             formatter.SetCodeBlock(codeBlock);

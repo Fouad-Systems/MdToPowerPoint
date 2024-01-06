@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.Parsers.Markdown;
+﻿using Microsoft.Office.Interop.PowerPoint;
+using Microsoft.Toolkit.Parsers.Markdown;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,15 @@ using System.Threading.Tasks;
 
 namespace PowerPointLibrary.Entities
 {
+
+    public enum TextAlins
+    {
+        start,
+        end,
+        center,
+        justify
+    }
+
     /// <summary>
     /// a Texte part or element , description
     /// </summary>
@@ -56,6 +66,7 @@ namespace PowerPointLibrary.Entities
         }
         public string Text { get; set; }
 
+        public PpParagraphAlignment ParagraphAlignment { get; set; }
 
         public List<TextElementStyle> TextElementStyles = new List<TextElementStyle>();
 
@@ -63,6 +74,7 @@ namespace PowerPointLibrary.Entities
         public TextStructure()
         {
             Text = "";
+            ParagraphAlignment = PpParagraphAlignment.ppAlignJustify;
         }
 
         public object Clone()

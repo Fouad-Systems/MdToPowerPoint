@@ -62,7 +62,9 @@ namespace ColorCode
 
             int offset = this.TextStructure.Text.Length;
 
-            this.TextStructure.Text += parsedSourceCode.Replace("\n", "");
+            // La propriété textRange.Text de PowerPoint remplate \r\n par \r
+            this.TextStructure.Text += parsedSourceCode;
+               // .Replace("\r\n", "\r");
 
             foreach (TextInsertion styleInsertion in styleInsertions)
             {

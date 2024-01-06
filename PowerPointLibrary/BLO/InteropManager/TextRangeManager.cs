@@ -15,7 +15,7 @@ namespace PowerPointLibrary.Manager
         public void AddTextStructure(TextRange textRange, TextStructure textStructure)
         {
             textRange.Text = textStructure.Text;
-
+           // textRange.ParagraphFormat.Alignment = textStructure.ParagraphAlignment;
 
             foreach (var textElement in textStructure.TextElementStyles)
             {

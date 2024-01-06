@@ -80,7 +80,7 @@
     <Compile Include="BLO\TopptArgumentsBLO.cs" />
     <Compile Include="BLO\PresentationStructureBLO.cs" />
     <Compile Include="BLO_0\SlideBLO.cs" />
-    <Compile Include="BLO_0\SlideZoneBLO.cs" />
+    <Compile Include="BLO\SlideZoneBLO.cs" />
     <Compile Include="BLO_0\TemplateBLO.cs" />
     <Compile Include="Entities\GLayoutStructure.cs" />
     <Compile Include="Entities\CommentAction.cs" />
