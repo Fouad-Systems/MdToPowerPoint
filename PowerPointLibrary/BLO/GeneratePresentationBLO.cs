@@ -50,16 +50,26 @@ namespace PowerPointLibrary.BLO
 
         public string ImagePatheFile(string ImageURL)
         {
-            // si le chemin de l'image est relative, 
-            // dans mon chaine de production dans Jekyll, je dépose les articles à l'intérieur d'un document
-            // dans la collection _Chapitres, pour corriger les chemins des images il faut ajoutert : "../"
-
-            if (ImageURL.StartsWith("../")) ImageURL = "../" + ImageURL;
+  
+            if (ImageURL.StartsWith("../"))
+            {
+                // TODO : Il faut ajouter ça dans le fichier de configuration
+                // si le chemin de l'image est relative, 
+                // dans mon chaine de production dans Jekyll, je dépose les articles à l'intérieur d'un document
+                // dans la collection _Chapitres, pour corriger les chemins des images il faut ajoutert : "../"
+                ImageURL = "../" + ImageURL;
+            }
+                
             else
             {
+                // Pourquoi ajouter "../../" ?
+                // l'image est dans _Chapitre/Comprendre-ordinateur/informatique.md  : ./image/photo.png
+                // l'image est dans ../.././image/photo.png
                 ImageURL = "../../" + ImageURL;
             }
-           
+
+
+
 
             string imageFilePath = Path.Combine(pplArguments.MdDocumentDirectoryPath, ImageURL);
             return imageFilePath;
