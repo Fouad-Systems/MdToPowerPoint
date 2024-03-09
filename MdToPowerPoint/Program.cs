@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PowerPointLibrary.Exceptions;
 using PowerPointLibrary.Entities;
+using System.Diagnostics;
 
 namespace MdToPowerPoint
 {
@@ -21,6 +22,7 @@ namespace MdToPowerPoint
     {
         static void Main(string[] args)
         {
+            CloseAllPowerpointsFiles();
 
             TopptArguments topptArguments = new TopptArgumentsBLO().Read(args);
             CreatePresenytation(topptArguments);
@@ -39,13 +41,27 @@ namespace MdToPowerPoint
 
         }
 
+         
+
+        private static void CloseAllPowerpointsFiles()
+        {
+            var process = System.Diagnostics.Process.GetProcesses();
+            foreach (var item in process)
+            {
+                if (item.ProcessName == "POWERPNT")
+                {
+                    item.Kill();
+                }
+            }
+        }
+
         /// <summary>
         /// Create the presentation from md file
         /// </summary>
         /// <param name="pplArguments"></param>
         private static void CreatePresenytation(TopptArguments pplArguments)
         {
-
+          
             // Load MarkDown file
             StreamReader sr = new StreamReader(pplArguments.MdDocumentPath);
             string md = sr.ReadToEnd();
@@ -55,6 +71,7 @@ namespace MdToPowerPoint
             MarkdownDocument mdDocument = new MarkdownDocument();
             mdDocument.Parse(md);
 
+            // TODO : Close présentation if it is open
 
             // Create presentation
             PresentationBLO presentationBLO = new PresentationBLO(pplArguments);
@@ -69,6 +86,11 @@ namespace MdToPowerPoint
 
 
     }
+
+
+   
+
+
 
     class Presentee
     {

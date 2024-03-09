@@ -37,3 +37,16 @@ Dans cette session, nous allons voir de façon simplifiée, ce que c'est le **web*
 ```html
 <!-- new slide -->
 ```
+
+## Utilisation des slides existant
+
+Ordre :
+
+```
+<!-- use : slide 2 -->
+```
+
+Exemple : 
+```
+E:\\formations\\algorithme\\algorithme-workspace\\PowerPointFiles\\2.2.informatique.slides.pptx
+```

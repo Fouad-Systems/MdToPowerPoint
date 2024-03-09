@@ -83,6 +83,17 @@ namespace PowerPointLibrary.BLO
                         }
                         continue;
                     }
+                    else
+                    {
+                        // Le cas d'un titre aprés un titre niveau 2
+                        if(contentNumber == 0)
+                        {
+                            this.CurrentSlide.CurrentZone.Text.Text =  element.ToString();
+                            continue;
+                        }
+                        
+
+                    }
                 }
 
                 // if paragraphe is action
